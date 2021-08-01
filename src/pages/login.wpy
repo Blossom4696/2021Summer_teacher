@@ -1,0 +1,91 @@
+<!-- login.wpy -->
+
+<style>
+
+</style>
+
+<template>
+    <view>
+        <view>账号</view>
+        <input class="input" data-name="username" @input="inputChange" value="{{ username }}" type="text" placeholder="请输入您的账号" />
+        <view>密码</view>
+        <input class="input" data-name="password" @input="inputChange" value="{{password}}" password = "true" type="safe-passward" placeholder="请输入您的密码" />
+        
+    </view>
+    <button type="primary" @tap="clickSubmit()">登录</button>
+    
+</template>
+
+<script>
+
+import wepy from 'wepy'
+export default class Login extends wepy.page{
+    config = {
+        usingComponents: {
+           
+        }
+    }
+
+    data={
+        userinfo:{
+            username: "",
+            password: "",
+        },
+        
+        
+    }
+
+    methods = {
+
+        clickSubmit(){
+            let self = this;
+            
+            wepy.request({
+                url:'http://159.138.3.194:8080/app/teacher/login',
+                method:'GET',
+                data:{
+                    username:self.userinfo.username,
+                    password:self.userinfo.password
+                },
+                header: wepy.$instance.setHeader(),
+                success: function(res) {
+                    console.log(res)
+                    let cookie = res.cookies[0].split(";")[0].split('=')
+                   
+                    
+                    if(res.data.Code == 1) {
+                        wepy.$instance.globalData.userInfo = res.data.Data
+                        if(res.data.Msg == "Teacher login success!"){
+                            wepy.$instance.globalData.userInfo.Ticon = "http://159.138.3.194:8080/app/file/get_image?name=" + wepy.$instance.globalData.userInfo.Ticon
+                            wepy.$instance.globalData.userInfo.type = "teacher"
+                        }
+                        
+                        
+                        wepy.setStorageSync(cookie[0],cookie[1] + "=")
+                        wepy.setStorageSync("sessionDate", Date.parse(new Date()))
+                        wepy.setStorageSync("sessionUserInfo",res.data.Data)
+                        console.log("login success")
+                        self.$apply()
+                        console.log(self)
+                        wepy.navigateBack({url:"index"})
+                        
+                        
+                    }
+                }
+            })
+        },
+
+
+        inputChange(e) {
+            let self = this
+            self.userinfo[e.currentTarget.dataset.name] = e.detail.value.trim()
+        },
+
+    }
+
+    onLoad() {
+
+
+    }
+}
+</script>

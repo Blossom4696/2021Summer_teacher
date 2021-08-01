@@ -1,0 +1,168 @@
+<!-- index.wpy -->
+<style lang="less">
+  .tab-bar{
+    position:fixed;
+    bottom:0;
+    width:100%;
+  }
+
+  .header{
+    height:30vh;
+    position: relative;
+  }
+
+  .userinfo {
+    display: flex;
+    flex-direction: row;
+    position:absolute;
+    top:30%;
+    transform: translateY(-50%);
+    margin:50rpx;
+    // align-items: center;
+  }
+
+  .userinfo-avatar {
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: 50%;
+    margin:20rpx;
+  }
+
+  .userinfo-other {
+    color: #aaa;
+    margin:20rpx;
+    // line-height: 120rpx;
+  }
+
+</style>
+
+<template>
+  
+  <view class="header">
+    <view class="userinfo" @tap="onClickLogin()">
+      <image class="userinfo-avatar" src="{{ userInfo.Ticon }}" background-size="cover"/>
+      <view class="userinfo-other">
+        <view >姓名：{{ userInfo.Tnickname }}</view>
+      </view>
+    </view>
+  </view>
+  
+
+  <button @tap="onClickExercise()" class='weui-btn' type="primary"> 布置今日习题 </button>
+  <button class='weui-btn' type="primary"> 我的错题 </button>
+
+
+  <mp-dialog title="登录" show="{{dialogShow}}" bindbuttontap="tapDialogButton" buttons="{{buttons}}">
+      <view>您还未登录，现在登录吗？</view>
+  </mp-dialog>
+
+  <mp-dialog title="登录" show="{{dialogShowOneButton}}" bindbuttontap="tapDialogOneButton" buttons="{{oneButton}}">
+      <view>登录信息已过期，请重新登录！</view>
+  </mp-dialog>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Index extends wepy.page {
+    config = {
+      usingComponents:{
+          "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
+          
+      
+      }
+    }
+
+    data={
+      userInfo: {
+        Tnickname: '未登录',
+        Ticon: 'http://159.138.3.194:8080/app/file/get_image?name=none_userinfo.png',
+      },
+      dialogShow: false,
+      dialogShowOneButton: false,
+      buttons: [{text: '稍后登录'}, {text: '确定'}],
+      oneButton: [{text: '确定'}],
+    }
+
+    methods= {
+      onClickExercise() {
+        this.$navigate({url:"exercise"})
+      },
+
+      onClickLogin() {
+        this.$navigate({url:"login"})
+      },
+
+
+      tapDialogOneButton(e) {
+        let self = this
+        this.$navigate({url:"login"})
+        self.dialogShowOneButton = false
+      },
+
+      tapDialogButton(e) {
+        let self = this
+        if (e.detail.index == 1) {
+          this.$navigate({url:"login"})
+        }
+        self.dialogShow = false
+      },
+
+
+      //检查sessionid是否过期的方法
+      onCheckSessionTimeout(self) {
+        console.log("checking session")
+        const SESSION_TIMEOUT = 12 * 60 * 60 * 1000 //登陆状态有效时间为12小时
+        let sessionid = wepy.getStorageSync(wepy.$instance.globalData.session.sessionKey)
+        let sessionTime = wepy.getStorageSync(wepy.$instance.globalData.session.sessionDate)
+
+        if (sessionid == null || sessionid == undefined || sessionid == ""||sessionTime == null || sessionTime == undefined || sessionTime == "") {
+          console.log("session is empty")
+          return
+        }
+
+        let aftertimestamp = Date.parse(new Date())
+        console.log(aftertimestamp)
+        if (aftertimestamp - sessionTime >= SESSION_TIMEOUT) {
+          // 过期后清除session缓存
+          wepy.removeStorageSync(wepy.$instance.globalData.session.sessionKey)
+          wepy.removeStorageSync(wepy.$instance.globalData.session.sessionDate)
+          wepy.removeStorageSync(wepy.$instance.globalData.session.sessionUseriNFO)
+          console.log("remove session!")
+          self.userInfo = {
+              Tnickname: '未登录',
+              Ticon: 'http://159.138.3.194:8080/app/file/get_image?name=none_userinfo.png',
+            }
+          self.dialogShowOneButton = true
+          self.$apply()
+        }
+      },
+
+    }
+
+
+
+    onLoad() {
+      let self = this
+
+      //检查sessionid是否过期
+      self.methods.onCheckSessionTimeout(self)
+
+      if(wepy.getStorageSync(wepy.$instance.globalData.session.sessionKey)) 
+        return
+      self.dialogShow = true
+    }
+
+    onShow() {
+      
+      let self = this
+      wepy.$instance.globalData.userInfo = wepy.getStorageSync(wepy.$instance.globalData.session.sessionUserInfo)
+      
+      if(wepy.$instance.globalData.userInfo.type!=null) {
+        self.userInfo = wepy.$instance.globalData.userInfo
+      }   
+      
+    }
+  }
+
+</script>

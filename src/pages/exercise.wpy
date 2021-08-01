@@ -1,0 +1,126 @@
+<!-- exercise.wpy -->
+<style lang="less">
+
+
+.exercise_item{
+    padding:20rpx;
+    border: grey solid 1rpx;
+}
+
+.exercise_upper{
+    display: flex;
+    flex-direction: row;
+    align-items: center; 
+       
+}
+
+.title{
+    margin: 20rpx;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 360rpx;
+}
+
+.grade{
+    margin: 20rpx;    
+}
+
+.tab-bar-title__selected {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.weui-tabs-swiper {
+    width: 100%;
+    height: 100px;
+}
+
+</style>
+
+<template>
+
+<view wx:for="{{exerciseList}}" wx:key="index" wx:for-item="exercise">
+    <view class="exercise_item" >
+        <!-- 里面两行，上面行 -->
+        <view class="exercise_upper">
+            <!-- 题目难度标签 -->
+            <view>
+                {{exercise.Edifficulty}}
+            </view>
+            <!-- 题目title -->
+            <view class="title">
+                {{exercise.Etitle}}
+            </view>
+            <view>
+                {{exercise.Esubject}}
+            </view>
+            <view class="grade">
+                {{exercise.Egrade}}
+            </view>
+        </view>
+        <!-- 下面行 -->
+        <view>
+        </view>
+    </view>
+</view>
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Index extends wepy.page {
+    config = {
+      usingComponents:{
+          
+        }
+    }
+
+    data = {
+        exerciseList:[],
+        titles : ['全部','语文','英语','数学','物理'],
+        tabs: [],
+        activeTab: 0
+    }
+
+    methods = {
+        onTabClick(e) {
+            let self = this
+            let index = e.detail.index
+            self.activeTab= index
+        },
+
+        onTabChange(e) {
+            let self = this
+            let index = e.detail.index
+            self.activeTab= index
+        },
+
+
+        getExercise(self) {
+            wepy.request({
+                url:'http://159.138.3.194:8080/app/exercise/get_all_exercise',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.exerciseList = res.data.Data
+                        self.$apply()
+                    }
+                }
+            })
+        }
+    }
+
+    onLoad() {
+        let self = this
+
+        self.tabs = self.titles.map(item => ({title: item}))
+
+        self.methods.getExercise(self)
+        
+    }
+  }
+
+</script>
