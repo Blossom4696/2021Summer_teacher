@@ -1,0 +1,159 @@
+<style>
+page{
+    background-color: white;
+}
+</style>
+
+<template>
+    <view class="solid-bottom padding">
+        <view class="text-black text-xl text-bold text-cut">
+            {{Sname}}的错题
+        </view>
+        <view class="text-black text-xl text-bold text-cut">
+            {{wrongProblem.Wtitle}}
+        </view>
+        <view class="flex margin">
+            <view class="flex-start cu-tag radius bg-green text-lg light">
+                {{wrongProblem.Wgrade}}
+            </view>
+            <view class="flex-start cu-tag radius bg-brown text-lg light">
+                {{wrongProblem.Wsubject}}
+            </view>
+        </view>
+    </view>
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            题目描述: {{wrongProblem.Wdescription}}
+        </view>
+
+        <view class="margin text-lg" wx:if="{{wrongProblem.WproblemTxt!=''}}">
+            {{wrongProblem.WproblemTxt}}
+        </view>
+
+        <view class="margin" wx:if="{{wrongProblem.WproblemPath!=''}}">
+            <view wx:if="{{wrongProblem.Wtype!='听写'}}" >
+                <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
+                    <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" @tap="ViewImageOfName" data-url="{{imgOfName}}"></image>
+                </view>
+            </view>
+            
+            <audio src="{{wrongProblem.WproblemPath?(audioUrl + wrongProblem.WproblemPath):''}}" wx:else controls="true" name="" author=""></audio>
+
+            
+        </view>
+        
+        
+    </view>
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            正确答案
+        </view>
+
+        <view class="margin text-lg" wx:if="{{wrongProblem.WanswerTxt!=''}}">
+            {{wrongProblem.WanswerTxt}}
+        </view>
+
+        <view class="margin" wx:if="{{wrongProblem.WanswerPath!=''}}">
+            <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
+                <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
+            </view>
+        </view>
+    </view>
+    
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            我的答案
+        </view>
+
+        <view class="margin text-lg" wx:if="{{wrongProblem.WmyAnswerTxt!=''}}">
+            {{wrongProblem.WmyAnswerTxt}}
+        </view>
+        <view class="margin text-lg" wx:else>
+            学生未作答
+        </view>
+
+        <view class="margin" wx:if="{{wrongProblem.WmyAnswerPath!=''}}">
+            <!-- <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
+                <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
+            </view> -->
+        </view>
+    </view>
+    
+   
+    
+
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Index extends wepy.page {
+    config = {
+        usingComponents:{
+        }
+    }
+
+    data = {
+        Wid:0,
+        Sname:"",
+        wrongProblem:{},
+        imageUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
+        imageListOfName: [],
+        imageListOfAnswer: [],
+    }
+
+    methods = {
+        
+        ViewImageOfName(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfName,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+
+        ViewImageOfAnswer(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfAnswer,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Wid = options.wid
+        self.Sname = options.sname
+
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/get_wrong_problem',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                data:{
+                    Wid:self.Wid,
+                    Sid:self.Sid,
+                },
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.wrongProblem = res.data.Data
+                        if(res.data.Data.WproblemPath!=""){
+                            let tmpList = res.data.Data.WproblemPath.split(";")
+                            self.imageListOfName = tmpList.map(x => self.imageUrl + x)
+                        }
+                        if(res.data.Data.WanswerPath!=""){
+                            let tmpList = res.data.Data.WanswerPath.split(";")
+                            self.imageListOfAnswer = tmpList.map(x => self.imageUrl + x)
+                        }
+                        self.$apply()
+                    }
+                }
+            })
+    }
+}
+</script>

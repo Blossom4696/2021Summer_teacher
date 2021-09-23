@@ -1,0 +1,475 @@
+<style>
+
+</style>
+
+<template>
+    <radio-group class="flex padding bg-white" bindchange="radioChange">
+        <label class="flex-sub flex align-center" wx:for="{{radioGroupItems}}" wx:for-item="item">
+            <radio value="{{item.value}}" checked="{{item.checked}}"/>
+            <view class="text-black text-lg text-bold">{{item.name}}</view>
+        </label>
+    </radio-group>
+
+    <form wx:if="{{radioGroupItems[0].checked==true}}" @submit="formSubmit">
+        <view class="cu-form-group">
+            <view class="title">学生作答(文字)</view>
+            <input name="WmyAnswerTxt" placeholder="学生作答文字"></input>
+        </view>
+
+        <view class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
+            <view class="action">
+                学生作答(图片)
+            </view>
+            <view class="action">
+                {{imgList.myAnswer.length}}/2
+            </view>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="grid col-4 grid-square flex-sub">
+                <view class="bg-img" wx:for="{{imgList.myAnswer}}" wx:key="{{index}}" bindtap="ViewImage" data-url="{{imgList.myAnswer[index]}}" data-file="myAnswer">
+                    <image src='{{imgList.myAnswer[index]}}' mode='aspectFill'></image>
+                    <view class="cu-tag bg-red" catchtap="DelImg" data-index="{{index}}" data-file="myAnswer">
+                        <text class="cuIcon-close"></text>
+                    </view>
+                </view>
+                <view class="solids" bindtap="ChooseImage" wx:if="{{imgList.myAnswer.length<2}}" data-file="myAnswer">
+                    <text class="cuIcon-cameraadd"></text>
+                </view>
+            </view>
+        </view>
+    </form>
+
+    <form wx:else @submit="formSubmit">
+        <view class="cu-form-group margin-top">
+            <view class="title">标题</view>
+            <input name="Wtitle" placeholder="习题标题用于列表展示"></input>
+        </view>
+        <view class="cu-form-group">
+            <view class="title">描述</view>
+            <input name="Wdescription" placeholder="题目提示信息"></input>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">年级</view>
+            <picker bindchange="pickerGradeChange" name="Wgrade" value="{{gradePicker[gradeIndex]}}" range="{{gradePicker}}">
+                <view class="picker">
+                    <text class="text-lg">{{gradeIndex?gradePicker[gradeIndex]:'选择题目的年级'}}</text>
+                </view>
+            </picker>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">科目</view>
+            <picker bindchange="pickerSubjectChange" name="Wsubject" value="{{subjectPicker[subjectIndex]}}" range="{{subjectPicker}}">
+                <view class="picker">
+                    <text class="text-lg">{{subjectIndex?subjectPicker[subjectIndex]:'选择题目的科目'}}</text>
+                </view>
+            </picker>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">类型</view>
+            <picker bindchange="pickerTypeChange" name="Wtype" value="{{typePicker[subjectPicker[subjectIndex]][typeIndex]}}" range="{{typePicker[subjectPicker[subjectIndex]]}}">
+                <view class="picker">
+                    <text class="text-lg">{{typeIndex?typePicker[subjectPicker[subjectIndex]][typeIndex]:'选择题目的类型'}}</text>
+                </view>
+            </picker>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">习题题目文字</view>
+            <input name="WproblemTxt" placeholder="习题题目文字"></input>
+        </view>
+
+        <view wx:if="{{typePicker[subjectPicker[subjectIndex]][typeIndex]!='听写'}}" class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
+            <view class="action">
+                习题题目图片
+            </view>
+            <view class="action">
+                {{imgList.name.length}}/2
+            </view>
+        </view>
+        <view class="cu-form-group" wx:if="{{typePicker[subjectPicker[subjectIndex]][typeIndex]!='听写'}}">
+            <view class="grid col-4 grid-square flex-sub">
+                <view class="bg-img" wx:for="{{imgList.name}}" wx:key="{{index}}" bindtap="ViewImage" data-url="{{imgList.name[index]}}" data-file="name">
+                    <image src='{{imgList.name[index]}}' mode='aspectFill'></image>
+                    <view class="cu-tag bg-red" catchtap="DelImg" data-index="{{index}}" data-file="name">
+                        <text class="cuIcon-close"></text>
+                    </view>
+                </view>
+                <view class="solids" bindtap="ChooseImage" wx:if="{{imgList.name.length<2}}" data-file="name">
+                    <text class="cuIcon-cameraadd"></text>
+                </view>
+            </view>
+        </view>
+
+        <view wx:else class="cu-form-group">
+            <view class="title">
+                习题题目音频
+            </view>
+            <button class="cu-btn bg-green shadow" @touchstart="startRecord" @touchend="endRecord">
+                点击录音
+            </button>
+            <button class="cu-btn bg-{{audioUploadPath!=''?'green':'grey'}} shadow" @tap="onClickPlayRecord">播放录音</button>
+            <view wx:if="{{audioUploadPath!=''}}" class="action">{{duration}}</view>
+            <view wx:else class="action">0'000s</view>
+        </view>
+
+
+        <view class="cu-form-group">
+            <view class="title">习题答案文字</view>
+            <input name="WanswerTxt" placeholder="习题答案文字"></input>
+        </view>
+
+        <view class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
+            <view class="action">
+                习题答案图片
+            </view>
+            <view class="action">
+                {{imgList.answer.length}}/2
+            </view>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="grid col-4 grid-square flex-sub">
+                <view class="bg-img" wx:for="{{imgList.answer}}" wx:key="{{index}}" bindtap="ViewImage" data-url="{{imgList.answer[index]}}" data-file="answer">
+                    <image src='{{imgList.answer[index]}}' mode='aspectFill'></image>
+                    <view class="cu-tag bg-red" catchtap="DelImg" data-index="{{index}}" data-file="answer">
+                        <text class="cuIcon-close"></text>
+                    </view>
+                </view>
+                <view class="solids" bindtap="ChooseImage" wx:if="{{imgList.answer.length<2}}" data-file="answer">
+                    <text class="cuIcon-cameraadd"></text>
+                </view>
+            </view>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">学生作答(文字)</view>
+            <input name="WmyAnswerTxt" placeholder="学生作答文字"></input>
+        </view>
+
+        <view class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
+            <view class="action">
+                学生作答(图片)
+            </view>
+            <view class="action">
+                {{imgList.myAnswer.length}}/2
+            </view>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="grid col-4 grid-square flex-sub">
+                <view class="bg-img" wx:for="{{imgList.myAnswer}}" wx:key="{{index}}" bindtap="ViewImage" data-url="{{imgList.myAnswer[index]}}" data-file="myAnswer">
+                    <image src='{{imgList.myAnswer[index]}}' mode='aspectFill'></image>
+                    <view class="cu-tag bg-red" catchtap="DelImg" data-index="{{index}}" data-file="myAnswer">
+                        <text class="cuIcon-close"></text>
+                    </view>
+                </view>
+                <view class="solids" bindtap="ChooseImage" wx:if="{{imgList.myAnswer.length<2}}" data-file="myAnswer">
+                    <text class="cuIcon-cameraadd"></text>
+                </view>
+            </view>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">难度</view>
+            <picker bindchange="pickerDifficultyChange" name="Wdifficulty" value="{{difficultyPicker[difficultyIndex]}}" range="{{difficultyPicker}}">
+                <view class="picker">
+                    <text class="text-lg">{{difficultyPicker[difficultyIndex]}}</text>
+                </view>
+            </picker>
+        </view>
+
+        <view class="cu-form-group">
+            <view class="title">单元</view>
+            <input name="Wunit" placeholder="【选填】一单元、二单元"></input>
+        </view>
+        <view class="padding flex justify-center bg-white">
+            <button class="cu-btn bg-green shadow lg" form-type="submit">上传习题</button>
+        </view>
+    </form>
+</template>
+
+<script>
+const recoderManager = wx.getRecorderManager()
+const innerAudioContext = wx.createInnerAudioContext()
+import wepy from 'wepy'
+export default class Index extends wepy.page{
+    data={
+        Sid: -1,
+        radioGroupItems: [
+            {value:'from-db', name:'从习题库中选取', checked: true},
+            {value:'from-self', name:'自行添加', checked: false}
+        ],
+        imgList: {
+            name:[],
+            answer:[],
+            myAnswer:[],
+        },
+        gradePicker:['七年级','八年级','九年级','高一','高二','高三'],
+        subjectPicker:['语文','数学','英语','物理'],
+        typePicker:{
+            '语文':['默写','听写'],
+            '数学':['选择题','填空题','解答题'],
+            '英语':['默写','听写'],
+            '物理':['选择题','填空题','解答题'],
+        },
+        difficultyPicker: [
+            '简单',
+            '中等',
+            '困难',
+            '竞赛',
+        ],
+        gradeIndex:null,
+        subjectIndex:null,
+        typeIndex:null,
+        difficultyIndex:0,
+        nameUploadPath:"",
+        answerUploadPath:"",
+        audioUploadPath:"",
+        recordingTimeqwe:0,//录音计时
+        setInter:"",//录音名称
+        duration:"",
+    }
+
+    methods={
+        radioChange(e){
+            let self = this
+            let items = self.radioGroupItems
+            for (let i = 0, len = items.length; i < len; ++i) {
+                items[i].checked = items[i].value === e.detail.value
+            }
+            self.radioGroupItems = items
+        },
+
+        pickerDifficultyChange(e) {
+            let self = this
+            self.difficultyIndex = e.detail.value
+        },
+
+        pickerGradeChange(e){
+            let self = this
+            self.gradeIndex = e.detail.value
+        },
+
+        pickerSubjectChange(e){
+            let self = this
+            if(self.subjectIndex != e.detail.value){
+                self.typeIndex = null
+            }
+            self.subjectIndex = e.detail.value
+            
+        },
+
+        pickerTypeChange(e){
+            let self = this
+            self.typeIndex = e.detail.value
+        },
+
+        ChooseImage(e) {
+            let self = this
+            let file = e.currentTarget.dataset.file
+            wx.chooseImage({
+                count: 2, //默认9
+                sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
+                sourceType: ['album', 'camera'],
+                success: (res) => {
+                    if (self.imgList[file].length != 0) {
+                        self.imgList[file]=self.imgList[file].concat(res.tempFilePaths)
+                    } else {
+                        self.imgList[file]= res.tempFilePaths
+                    }
+                    self.$apply()
+                }
+            });
+        },
+
+        ViewImage(e) {
+            let self = this
+            let file = e.currentTarget.dataset.file
+            wx.previewImage({
+                urls: self.imgList[file],
+                current: e.currentTarget.dataset.url
+            });
+        },
+
+        DelImg(e) {
+            let self = this
+            let file = e.currentTarget.dataset.file
+            wx.showModal({
+                title: '删除题目图片',
+                content: '确定要删除这张图片吗？',
+                cancelText: '取消',
+                confirmText: '确定',
+                success: res => {
+                    if (res.confirm) {
+                        self.imgList[file].splice(e.currentTarget.dataset.index, 1);
+                        self.$apply()
+                    }
+                }
+            })
+        },
+
+        startRecord(e){
+            const options = {
+                duration: 10000,
+                sampleRate: 16000,
+                numberOfChannels: 1,
+                encodeBitRate: 48000,
+                format:'mp3',
+                frameSize: 50
+            }
+            recoderManager.start(options)
+            recoderManager.onStart(() =>{
+                console.log("开始录音")
+            })
+        },
+
+        endRecord(e){
+            let self = this
+            recoderManager.stop()
+            recoderManager.onStop((res) =>{
+                console.log("停止录音",res)
+                self.audioUploadPath = res.tempFilePath
+                self.duration = Math.floor(res.duration/1000) + "'" + res.duration%1000 + "s"
+                self.$apply()
+                wx.showToast({
+                    title:'录音完成'
+                })
+            })
+        },
+
+        onClickPlayRecord(){
+            let self = this
+            innerAudioContext.src = self.audioUploadPath
+            innerAudioContext.play();
+            innerAudioContext.onEnded(() => {
+                innerAudioContext.stop()
+            })
+        },
+
+        formSubmit(e) {
+            console.log(e.detail.value)
+            let self = this
+
+            let imgPaths = []
+            for(let i = 0; i<self.imgList.name.length;i++){
+                imgPaths.push(self.imgList.name[i])
+            }
+            for(let i = 0; i<self.imgList.answer.length;i++){
+                imgPaths.push(self.imgList.answer[i])
+            }
+
+            let successUp = 0; //成功
+            let failUp = 0; //失败
+            let count = 0; //第几张
+            let length = imgPaths.length; //总数
+
+            let sendFormData = e.detail.value // form 表单数据
+            sendFormData["Sid"] = Number(self.Sid)
+            
+            if(imgPaths.length>0 && self.typePicker[self.subjectPicker[self.subjectIndex]][self.typeIndex]!='听写'){// 图片上传
+                self.recursionImgUpload(self,imgPaths, successUp, failUp, count, length)
+
+                sendFormData["WproblemPath"] = self.imgList.name.length == 0? "" : "wrong-problem/" + self.imgList.name[0].replace("http://tmp/","")
+                sendFormData["WanswerPath"] = self.imgList.answer.length == 0? "" : "wrong-problem/" + self.imgList.answer[0].replace("http://tmp/","")
+                sendFormData["WmyAnswerPath"] = self.imgList.myAnswer.length == 0? "" : "wrong-problem/" + self.imgList.myAnswer[0].replace("http://tmp/","")
+                for(let i = 1; i<self.imgList.name.length;i++){
+                    sendFormData["WproblemPath"] += ";wrong-problem/" + self.imgList.name[i].replace("http://tmp/","")
+                }
+                for(let i = 1; i<self.imgList.answer.length;i++){
+                    sendFormData["WanswerPath"] += ";wrong-problem/" + self.imgList.answer[i].replace("http://tmp/","")
+                }
+                for(let i = 1; i<self.imgList.myAnswer.length;i++){
+                    sendFormData["WmyAnswerPath"] += ";wrong-problem/" + self.imgList.myAnswer[i].replace("http://tmp/","")
+                }
+            } else if(imgPaths.length>0){// 音频上传
+                self.audioUpload(self, failUp)
+
+                sendFormData["WproblemPath"] = self.audioUploadPath.replace("http://tmp/","")
+            }
+
+            if(failUp == 0) {
+                wepy.request({
+                    url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/insert_wrong_problem',
+                    method:'POST',
+                    data: sendFormData,
+                    header: wepy.$instance.setHeader(),
+                    success: function(res) {
+                        console.log(res)
+                        if (res.data.Code == 1){
+                            
+                        }
+                    }
+                })
+            }
+        },
+    }
+
+    // 递归方式上传多张图片
+    recursionImgUpload(self,imgPaths, successUp, failUp, count, length){
+        wepy.uploadFile({
+            url: wepy.$instance.globalData.serverUrl + '/app/file/upload_file', //开发者服务器 url
+            header: wepy.$instance.setHeader(),
+            filePath: imgPaths[count], //要上传文件资源的路径
+            name: 'uploadFile', //文件对应的 key , 开发者在服务器端通过这个 key 可以获取到文件二进制内容
+            formData:{
+                dirName:"images/wrong-problem"
+            },
+            header: {
+                'content-type': 'multipart/form-data'
+            },
+            success(e){
+                if (e.data.Code==1){
+                    console.log("上传成功第" + count + "张")
+                }
+                successUp++;//成功+1
+            },
+            fail(e){
+                failUp++;//失败+1
+            },
+            complete(e){
+                
+                count++;
+                if(count == length) {
+                    console.log("上传成功")
+                }else{
+                    self.recursionImgUpload(self,imgPaths,successUp, failUp, count, length)
+                }
+            }
+        });
+        
+    }
+
+    // 上传音频
+    audioUpload(self, failUp) {
+        wepy.uploadFile({
+            url: wepy.$instance.globalData.serverUrl + '/app/file/upload_file', //开发者服务器 url
+            header: wepy.$instance.setHeader(),
+            filePath: self.audioUploadPath, //要上传文件资源的路径
+            name: 'uploadFile', //文件对应的 key , 开发者在服务器端通过这个 key 可以获取到文件二进制内容
+            formData:{
+                dirName:"audios"
+            },
+            header: {
+                'content-type': 'multipart/form-data'
+            },
+            success(e){
+                console.log("录音保存成功")
+            },
+            fail(e){
+                failUp++
+                console.log("录音保存失败")
+            },
+        });
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Sid = options.sid
+    }
+}
+</script>

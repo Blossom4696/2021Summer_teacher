@@ -24,6 +24,18 @@ export default class extends wepy.app {
       'pages/login',
       'pages/example',
       'pages/exercise',
+      'pages/exercise-detail',
+      'pages/create-exercise',
+      'pages/student',
+      'pages/student-second',
+      'pages/wrongproblem',
+      'pages/wrongproblem-detail',
+      'pages/create-wrongproblem',
+      'pages/todaygrade',
+      'pages/create-todayexercise',
+      'pages/learnsituation',
+      'pages/my',
+      'pages/askquestion-detail',
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -46,7 +58,7 @@ export default class extends wepy.app {
             "text": "习题"
         },
         {
-            "pagePath": "pages/example",
+            "pagePath": "pages/my",
             "iconPath": "images/my.png",
             "selectedIconPath": "images/myfill.png",
             "text": "我的"
@@ -63,16 +75,44 @@ export default class extends wepy.app {
 
   globalData = {
     userInfo: null,
-    session: {
-      sessionKey: "LoginSessionKey",
-      sessionDate: "sessionDate",
-      sessionUserInfo: "sessionUserInfo",
-    },
+    serverUrl: "http://1.116.126.208:8080",
   }
-
 
   onLaunch() {
+    let self = this
+    //检查sessionid是否过期
+    self.onCheckSessionTimeout()
+
+    if(wepy.getStorageSync("sessionUserInfo")){
+      this.globalData.userInfo = wepy.getStorageSync("sessionUserInfo")
+    }
+    
   }
+
+
+  //检查sessionid是否过期的方法
+  onCheckSessionTimeout() {
+    let self = this
+    console.log("checking session")
+    const SESSION_TIMEOUT = 3 * 60 * 60 * 1000 //登陆状态有效时间为3小时
+    let sessionToken = wepy.getStorageSync("sessionToken")
+    let sessionTime = wepy.getStorageSync("sessionDate")
+
+    if (sessionToken == null || sessionToken == undefined || sessionToken == ""||sessionTime == null || sessionTime == undefined || sessionTime == "") {
+      console.log("session is empty")
+      return
+    }
+
+    let aftertimestamp = Date.parse(new Date())
+    if (aftertimestamp - sessionTime >= SESSION_TIMEOUT) {
+      // 过期后清除session缓存
+      wepy.removeStorageSync("sessionToken")
+      wepy.removeStorageSync("sessionDate")
+      wepy.removeStorageSync("sessionUserInfo")
+      console.log("remove session!")
+    }
+  }
+
 
   sleep (s) {
     return new Promise((resolve, reject) => {
@@ -88,7 +128,7 @@ export default class extends wepy.app {
     let self = this
     let header = {
       'Content-type': 'application/json; charset=utf-8',
-      'Cookie': self.sessionkey + "=" + wepy.getStorageSync("LoginSessionKey") //读取本地保存好的上一次cookie
+      'TTToken': wepy.getStorageSync("sessionToken") //读取本地保存好的上一次cookie
     };
     return header
   }

@@ -41,35 +41,25 @@ export default class Login extends wepy.page{
             let self = this;
             
             wepy.request({
-                url:'http://159.138.3.194:8080/app/teacher/login',
+                url:wepy.$instance.globalData.serverUrl + '/app/login/teacher_login',
                 method:'GET',
                 data:{
                     username:self.userinfo.username,
                     password:self.userinfo.password
                 },
-                header: wepy.$instance.setHeader(),
                 success: function(res) {
-                    console.log(res)
-                    let cookie = res.cookies[0].split(";")[0].split('=')
-                   
-                    
+                    console.log(res.data.Data["userinfo"])
                     if(res.data.Code == 1) {
-                        wepy.$instance.globalData.userInfo = res.data.Data
+                        
                         if(res.data.Msg == "Teacher login success!"){
-                            wepy.$instance.globalData.userInfo.Ticon = "http://159.138.3.194:8080/app/file/get_image?name=" + wepy.$instance.globalData.userInfo.Ticon
-                            wepy.$instance.globalData.userInfo.type = "teacher"
+                            wepy.setStorageSync("sessionDate", Date.parse(new Date()))
+                            wepy.setStorageSync("sessionToken",res.data.Data["token"])
+                            wepy.setStorageSync("sessionUserInfo",res.data.Data["userinfo"])
+                            wepy.$instance.globalData.userInfo = res.data.Data["userinfo"]
+                            console.log("login success")
+                            self.$apply()
+                            wepy.navigateBack({url:"index"})
                         }
-                        
-                        
-                        wepy.setStorageSync(cookie[0],cookie[1] + "=")
-                        wepy.setStorageSync("sessionDate", Date.parse(new Date()))
-                        wepy.setStorageSync("sessionUserInfo",res.data.Data)
-                        console.log("login success")
-                        self.$apply()
-                        console.log(self)
-                        wepy.navigateBack({url:"index"})
-                        
-                        
                     }
                 }
             })

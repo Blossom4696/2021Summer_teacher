@@ -1,0 +1,134 @@
+<style>
+page{
+    background-color: white;
+}
+</style>
+
+<template>
+    <view class="solid-bottom padding">
+        <view class="text-black text-xl text-bold text-cut">
+            {{exercise.Etitle}}
+        </view>
+        <view class="flex margin">
+            <view class="flex-start cu-tag radius bg-green text-lg light">
+                {{exercise.Egrade}}
+            </view>
+            <view class="flex-start cu-tag radius bg-brown text-lg light">
+                {{exercise.Esubject}}
+            </view>
+        </view>
+    </view>
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            题目描述: {{exercise.Edescription}}
+        </view>
+
+        <view class="margin text-lg" wx:if="{{exercise.EnameTxt!=''}}">
+            {{exercise.EnameTxt}}
+        </view>
+
+        <view class="margin" wx:if="{{exercise.EnamePath!=''}}">
+            <view wx:if="{{exercise.Etype!='听写'}}" >
+                <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
+                    <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" @tap="ViewImageOfName" data-url="{{imgOfName}}"></image>
+                </view>
+            </view>
+            
+            <audio src="{{exercise.EnamePath?(audioUrl + exercise.EnamePath):''}}" wx:else controls="true" name="" author=""></audio>
+
+            
+        </view>
+        
+        
+    </view>
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            题目答案
+        </view>
+
+        <view class="margin text-lg" wx:if="{{exercise.EanswerTxt!=''}}">
+            {{exercise.EanswerTxt}}
+        </view>
+
+        <view class="margin" wx:if="{{exercise.EanswerPath!=''}}">
+            <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
+                <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
+            </view>
+        </view>
+    </view>
+    
+   
+    
+
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Index extends wepy.page {
+    config = {
+        usingComponents:{
+        }
+    }
+
+    data = {
+        Eid:0,
+        exercise:{},
+        imageUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
+        imageListOfName: [],
+        imageListOfAnswer: [],
+    }
+
+    methods = {
+        
+        ViewImageOfName(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfName,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+
+        ViewImageOfAnswer(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfAnswer,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Eid = options.eid
+
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/exercise/get_exercise',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                data:{
+                    Eid:self.Eid
+                },
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.exercise = res.data.Data
+                        if(res.data.Data.EnamePath!=""){
+                            let tmpList = res.data.Data.EnamePath.split(";")
+                            self.imageListOfName = tmpList.map(x => self.imageUrl + x)
+                        }
+                        if(res.data.Data.EanswerPath!=""){
+                            let tmpList = res.data.Data.EanswerPath.split(";")
+                            self.imageListOfAnswer = tmpList.map(x => self.imageUrl + x)
+                        }
+                        self.$apply()
+                    }
+                }
+            })
+    }
+}
+</script>

@@ -1,0 +1,386 @@
+<style>
+.DeleteButton{
+    color: red;
+}
+</style>
+
+<template>
+    <view class="flex bg-white align-center">
+        <view class="padding flex-sub text-left">
+            <button class="cu-btn bg-green shadow" wx:if="{{isClickCreateLearnSituation || isClickEditLearnSituation}}" @tap="onClickCancel">取消</button>
+        </view>
+        <view class="padding flex-sub text-center text-black text-lg text-bold">
+            学情统计
+        </view>
+        <view class="padding flex flex-sub justify-end">
+            <button class="cu-btn bg-green shadow" wx:if="{{isClickCreateLearnSituation || isClickEditLearnSituation}}" @tap="onClickSubmit">完成</button>
+        </view>
+    </view>
+    
+    <scroll-view scroll-x class="bg-white nav text-center">
+        <view class="cu-item {{index==tabCur?'text-blue cur':''}}" wx:for="{{tabList}}" wx:key bindtap="tabSelectBar" data-id="{{index}}" wx:for-item="item">
+            {{item.name}}
+        </view>
+    </scroll-view>
+
+    <view class="cu-card">
+        <view class="cu-item margin-top-xl margin-bottom-xl">
+            <view class="cu-list menu card-menuradius shadow">
+                <view class="cu-item flex align-center" wx:if="{{tabCur==0}}">
+                    <view class="text-center flex-sub text-bold">考勤</view>
+                    <view class="text-center flex-sub text-bold">表现</view>
+                    <view class="text-center flex-sub text-bold">作业</view>
+                    <view class="text-center flex-twice text-bold">日期</view>
+                </view>
+                <view class="cu-item flex align-center" wx:else>
+                    <view class="text-center flex-twice text-bold">考试</view>
+                    <view class="text-center flex-sub text-bold">科目</view>
+                    <view class="text-center flex-sub text-bold">成绩</view>
+                    <view class="text-center flex-twice text-bold">日期</view>
+                </view>
+
+                <view class="cu-item flex align-center" wx:if="{{tabCur==0}}" wx:for="{{learnSituationList['daily']}}" wx:key="index" wx:for-item="learnSituation">
+                    <mp-slideview class="flex-sub" buttons="{{slideButtons}}" bindbuttontap="slideButtonTap" data-id="{{index}}">
+                        <view wx:if="{{!isClickEditLearnSituation}}" class="flex">
+                            <view class="text-center flex-sub">
+                                {{learnSituation.LSattendence}}
+                            </view>
+                            <view class="text-center flex-sub">
+                                {{learnSituation.LSperform}}
+                            </view>
+                            <view class="text-center flex-sub">
+                                {{learnSituation.LShomework}}
+                            </view>
+                            <view class="text-center flex-twice">
+                                {{learnSituation.LSdate}}
+                            </view>
+                        </view>
+                        <view wx:else class="flex">
+                            <input class="text-center flex-sub" @input="inputChangeEditLearnSituation" value="{{learnSituation.LSattendence}}" data-id="{{index}}" data-name="LSattendence"></input>
+                            <input class="text-center flex-sub" @input="inputChangeEditLearnSituation" value="{{learnSituation.LSperform}}" data-id="{{index}}" data-name="LSperform"></input>
+                            <input class="text-center flex-sub" @input="inputChangeEditLearnSituation" value="{{learnSituation.LShomework}}" data-id="{{index}}" data-name="LShomework"></input>
+                            <picker class="text-center flex-twice" mode="date" value="{{learnSituation.LSdate}}" bindchange="bindDateChange" data-id="{{index}}">
+                                {{!isClickEditLearnSituation?learnSituation.LSdate:copyLearnSituationList['daily'][index].LSdate}}
+                            </picker>
+                        </view>
+                    </mp-slideview>
+                </view>
+
+                <view class="cu-item flex align-center" wx:if="{{tabCur==1}}" wx:for="{{learnSituationList['exam']}}" wx:key="index" wx:for-item="learnSituation" data-id="{{index}}">
+                    <mp-slideview class="flex-sub" buttons="{{slideButtons}}" bindbuttontap="slideButtonTap" data-id="{{index}}">
+                        <view wx:if="{{!isClickEditLearnSituation}}" class="flex">
+                            <view class="text-center flex-twice">
+                                {{learnSituation.LSexam}}
+                            </view>
+                            <view class="text-center flex-sub">
+                                {{learnSituation.LSsubject}}
+                            </view>
+                            <view class="text-center flex-sub">
+                                {{learnSituation.LSgrade}}
+                            </view>
+                            <view class="text-center flex-twice">
+                                {{learnSituation.LSdate}}
+                            </view>
+                        </view>
+                        <view wx:else class="flex">
+                            <input class="text-center flex-twice" @input="inputChangeEditLearnSituation" value="{{learnSituation.LSexam}}" data-id="{{index}}" data-name="LSexam"></input>
+                            <input class="text-center flex-sub"  @input="inputChangeEditLearnSituation" value="{{learnSituation.LSsubject}}" data-id="{{index}}" data-name="LSsubject"></input>
+                            <input class="text-center flex-sub" @input="inputChangeEditLearnSituation" value="{{learnSituation.LSgrade}}" data-id="{{index}}" data-name="LSgrade"></input>
+                            <picker class="text-center flex-twice" mode="date" value="{{learnSituation.LSdate}}" bindchange="bindDateChange" data-id="{{index}}">
+                                {{!isClickEditLearnSituation?learnSituation.LSdate:copyLearnSituationList['exam'][index].LSdate}}
+                            </picker>
+                        </view>
+                    </mp-slideview>
+                </view>
+
+
+                <view class="cu-item flex align-center" wx:if="{{isClickCreateLearnSituation}}">
+                    <view class="flex">
+                        <input class="text-center flex-{{tabCur==0?'sub':'twice'}}" @input="inputChangeCreateLearnSituation" focus="{{isClickCreateLearnSituation}}" data-index = "0" value="{{insertLearnSituationData[tabList[tabCur].value][0]}}"></input>
+                        <input class="text-center flex-sub" @input="inputChangeCreateLearnSituation" data-index = "1" value="{{insertLearnSituationData[tabList[tabCur].value][1]}}"></input>
+                        <input class="text-center flex-sub" @input="inputChangeCreateLearnSituation" data-index = "2" value="{{insertLearnSituationData[tabList[tabCur].value][2]}}"></input>
+                        
+                        <picker class="text-center flex-twice" mode="date" value="{{insertLSDate[tabList[tabCur].value]}}" bindchange="bindDateChange">
+                            {{insertLSDate[tabList[tabCur].value]}}
+                        </picker>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <block wx:if="{{!(isClickCreateLearnSituation || isClickEditLearnSituation)}}">
+            <view class="cu-item margin-top-xl margin-bottom-xl">
+                <view class="flex align-center">
+                    <button class="flex-sub text-center cu-btn bg-{{isClickCreateLearnSituation?'grey':'green'}}" @tap="onClickCreateLearnSituation">添加</button>
+                </view>
+                
+            </view>
+
+            <view class="cu-item margin-top-xl margin-bottom-xl">
+                <view class="flex align-center">
+                    <button class="flex-sub text-center cu-btn bg-{{isClickEditLearnSituation?'grey':'green'}}" @tap="onClickEditLearnSituation">编辑</button>
+                </view>
+                
+            </view>
+        </block>
+        
+    </view>
+
+    <mp-dialog title="删除校区" show="{{dialogShow}}" bindbuttontap="tapDeleteDialogButton" buttons="{{buttons}}" @close="dialogClose">
+        <view>确定要删除此条记录吗？</view>
+    </mp-dialog>
+</template>
+
+<script>
+import wepy from 'wepy'
+import moment from 'moment'; 
+export default class Index extends wepy.page{
+    config = {
+        "usingComponents": {
+            "mp-slideview": "weui-miniprogram/slideview/slideview",
+            "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
+        }
+    }
+
+    data = {
+        Sid:null,
+        learnSituationList:{},
+        learnSituationId: -1,
+        isClickCreateLearnSituation: false,
+        isClickEditLearnSituation: false,
+        slideButtons: [{
+                type: 'warn',
+                text: '删除',
+                extClass: 'DeleteButton',
+            }],
+        buttons: [{
+                text: '取消',
+            },{
+                text: '确定',
+                extClass: 'DeleteButton',
+            }],
+        dialogShow: false,
+        deleteIndex:-1,
+        insertLearnSituationData:{'daily':['','',''],'exam':['','','']},
+        insertLSDate:{'daily':'','exam':''},
+        copyLearnSituationList:[],
+        tabCur: 0,
+        tabList: [{value:'daily',name:'平时'},{value:'exam',name:'考试'}],
+    }
+    
+    methods = {
+        onClickCreateLearnSituation(){
+            let self = this
+            self.isClickCreateLearnSituation = true
+        },
+
+        onClickEditLearnSituation(){
+            let self = this
+            self.isClickEditLearnSituation = true
+        },
+
+        inputChangeEditLearnSituation(e) {
+            let self = this
+            let index = Number(e.currentTarget.dataset.id)
+            let name = e.currentTarget.dataset.name
+            self.copyLearnSituationList[self.tabList[self.tabCur].value][index][name] = e.detail.value.trim()
+        },
+
+        inputChangeCreateLearnSituation(e){
+            let self = this
+            let index = Number(e.currentTarget.dataset.index)
+            self.insertLearnSituationData[self.tabList[self.tabCur].value][index] = e.detail.value.trim()
+        },
+
+        bindDateChange(e) {
+            let self = this
+            console.log('picker发送选择改变，携带值为', e.detail.value)
+            if(self.isClickCreateLearnSituation){
+                self.insertLSDate[self.tabList[self.tabCur].value] = e.detail.value
+            }else if(self.isClickEditLearnSituation){
+                let index = Number(e.currentTarget.dataset.id)
+                self.copyLearnSituationList[self.tabList[self.tabCur].value][index]['LSdate'] = e.detail.value
+            }
+            
+        },
+
+        onClickCancel(){
+            let self = this
+            self.isClickEditLearnSituation = false
+            self.isClickCreateLearnSituation = false
+            this.$apply();
+        },
+
+        onClickSubmit(){
+            let self = this
+            if(self.isClickCreateLearnSituation){
+                self.createLearnSituation(self.insertLearnSituationData)
+                self.isClickCreateLearnSituation = false
+                
+            }
+            if(self.isClickEditLearnSituation){
+                let self = this
+                self.editLearnSituation()
+                self.isClickEditLearnSituation = false
+                
+            }
+        },
+
+        slideButtonTap(e) {
+            let self = this
+            self.deleteIndex = e.currentTarget.dataset.id
+            self.dialogShow = true
+        },
+
+        tabSelectBar(e) {
+            let self = this
+            self.tabCur = e.currentTarget.dataset.id
+        },
+
+        tapDeleteDialogButton(e) {
+            let self = this
+            self.dialogShow = false
+            if (e.detail.index == 1) {
+                self.deleteLearnSituation()
+                self.getLearnSituationData()
+            }
+        },
+
+        dialogClose(e){
+            let self = this
+            self.dialogShow = false
+        },
+    }
+
+    createLearnSituation(cname) {
+        let self = this
+
+        let sendData = {}
+        sendData['Sid'] = Number(self.Sid)
+        if(self.tabCur==0){
+            sendData['LSattendence'] = self.insertLearnSituationData['daily'][0]
+            sendData['LSperform'] = self.insertLearnSituationData['daily'][1]
+            sendData['LShomework'] = self.insertLearnSituationData['daily'][2]
+            sendData['LSdate'] = new Date(self.insertLSDate['daily'])
+        }else{
+            sendData['LSexam'] = self.insertLearnSituationData['exam'][0]
+            sendData['LSsubject'] = self.insertLearnSituationData['exam'][1]
+            sendData['LSgrade'] = self.insertLearnSituationData['exam'][2]
+            sendData['LSdate'] = new Date(self.insertLSDate['exam'])
+        }
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/insert_learn_situation',
+                method:'POST',
+                header: wepy.$instance.setHeader(),
+                data: sendData,
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        console.log("Insert LearnSituation Success!")
+                        self.getLearnSituationData()
+                    } else if(res.data.Code == 2){
+                        wepy.showToast({
+                            title: res.data.Msg, //提示的内容,
+                            icon: 'error', //图标,
+                            mask: true, //显示透明蒙层，防止触摸穿透,
+                            success: res => {}
+                        });
+                            
+                    }
+                }
+            })
+    }
+
+    editLearnSituation() {
+        let self = this
+        
+        let sendData = []
+        if(self.tabCur == 0){
+            sendData = self.copyLearnSituationList['daily']
+        }else if(self.tabCur == 1){
+            sendData = self.copyLearnSituationList['exam']
+        }
+        
+        for(let i=0;i<sendData.length;i++){
+            sendData[i].LSdate = new Date(sendData[i].LSdate)
+        }
+
+        console.log(sendData)
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/update_learn_situation',
+                method:'PUT',
+                header: wepy.$instance.setHeader(),
+                data: sendData,
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        console.log("Edit LearnSituation Success!")
+                        self.getLearnSituationData()
+                    }
+                }
+            })
+    }
+
+    deleteLearnSituation() {
+        let self = this
+
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/delete_learn_situation/:id' + '?LSid=' + self.learnSituationList[self.tabList[self.tabCur].value][self.deleteIndex].LSid.toString(),
+                method:'DELETE',
+                header: wepy.$instance.setHeader(),
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        console.log("Delete LearnSituation Success!")
+                    }
+                }
+            })
+    }
+
+    getLearnSituationData() {
+        let self = this
+        
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_learn_situation_list',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                data:{
+                    Sid:self.Sid,
+                },
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.learnSituationList = res.data.Data
+                        
+                        for(let i = 0; i < self.learnSituationList['daily'].length; i++){
+                            self.learnSituationList['daily'][i].LSdate = self.learnSituationList['daily'][i].LSdate.substring(0, 10)
+                        }
+
+                        for(let i = 0; i < self.learnSituationList['exam'].length; i++){
+                            self.learnSituationList['exam'][i].LSdate = self.learnSituationList['exam'][i].LSdate.substring(0, 10)
+                        }
+
+                        self.copyLearnSituationList = JSON.parse(JSON.stringify(self.learnSituationList)) //深拷贝
+                        self.$apply()
+                    }
+                }
+            })
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Sid = options.sid
+    }
+
+    onShow() {
+        let self = this
+        
+        self.getLearnSituationData()
+
+        var date = new Date()
+        self.insertLSDate['daily'] =  moment().format('YYYY-MM-DD')
+        self.insertLSDate['exam'] =  moment().format('YYYY-MM-DD')
+    }
+}
+</script>

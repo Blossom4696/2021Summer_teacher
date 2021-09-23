@@ -1,0 +1,90 @@
+<style>
+
+</style>
+
+<template>
+    <view class="cu-card">
+        <view class="cu-item shadow radius">
+            <view class="flex align-center">
+                <image class="cu-avatar round margin lg" src="{{ student.Sicon?imgUrl + student.Sicon:'' }}" background-size="cover"></image>
+                <view class="margin">
+                    <view class="text-black text-xl text-bold">{{ student.Snickname }}</view>
+                </view>        
+            </view>
+            
+            <view class="flex padding">
+                <view class="flex-sub margin-tb text-black text-lg">年级：{{ student.SgradeName }}</view>
+                <view class="flex-sub margin-tb text-black text-lg">校区：{{ student.Cname }}</view>
+            </view>
+        </view>
+        
+        <view class="cu-item margin-top-xl margin-bottom-xl">
+            <view class="cu-list menu card-menuradius shadow">
+                <view class="cu-item arrow">
+                    <view class="content" data-url="todaygrade" @tap="onClick">
+                        <view>今日习题成绩</view>
+                    </view>
+                </view>
+                <view class="cu-item arrow">
+                    <view class="content" data-url="wrongproblem" @tap="onClick">
+                        <view>错题整理</view>
+                    </view>
+                </view>
+                <view class="cu-item arrow">
+                    <view class="content" data-url="learnsituation" @tap="onClick">
+                        <view>学情统计</view>
+                    </view>
+                </view>
+            </view>
+        </view>
+        
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.page{
+
+    data={
+        Sid:null,
+        student:{},
+        imgUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+    }
+
+    methods={
+        onClick(e) {
+            let self = this
+            wx.navigateTo({
+                url:e.currentTarget.dataset.url+"?sid="+self.Sid,
+            })
+        },
+    }
+
+    getStudentData() {
+        let self = this
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_student',
+            method:'GET',
+            header: wepy.$instance.setHeader(),
+            data:{
+                Sid:self.Sid
+            },
+            success: function(res) {
+                console.log(res)
+                if (res.data.Code == 1){
+                    self.student = res.data.Data
+                    self.$apply()
+                }
+            }
+        })
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Sid = options.sid
+
+        self.getStudentData()
+    }
+}
+</script>

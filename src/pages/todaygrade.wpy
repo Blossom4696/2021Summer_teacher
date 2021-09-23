@@ -1,0 +1,214 @@
+<!-- exercise.wpy -->
+
+<style lang="less">
+    page{
+        background-color: white;
+    }
+
+    .titlePassBtn{
+        margin-top:20rpx;
+    }
+
+    .input {
+        width: 70%;
+    }
+
+    .submitBtn{
+        width: 150rpx;
+    }
+
+</style>
+
+<template>
+    <view wx:if="{{exerciseList!=null}}">
+        
+        <view class="solid-bottom padding">
+            <view class="text-black text-xl text-bold text-cut">
+                {{exerciseList[index]['Exercise'].Etitle}}
+            </view>
+            <view class="flex margin">
+                <view class="flex-start cu-tag radius bg-green text-lg light">
+                    {{exerciseList[index]['Exercise'].Egrade}}
+                </view>
+                <view class="flex-start cu-tag radius bg-brown text-lg light">
+                    {{exerciseList[index]['Exercise'].Esubject}}
+                </view>
+            </view>
+        </view>
+        <view class="padding solid-bottom">
+            <view class="text-xl text-black text-bold">
+                题目描述: {{exerciseList[index]['Exercise'].Edescription}}
+            </view>
+
+            <view class="margin text-lg" wx:if="{{exerciseList[index]['Exercise'].EnameTxt!=''}}">
+                {{exerciseList[index]['Exercise'].EnameTxt}}
+            </view>
+
+            <view class="margin" wx:if="{{exerciseList[index]['Exercise'].EnamePath!=''}}">
+                
+                <view wx:if="{{exerciseList[index]['Exercise'].Etype!='听写'}}" >
+                    <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
+                        <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" @tap="ViewImageOfName" data-url="{{imgOfName}}"></image>
+                    </view>
+                </view>
+
+                <audio src="{{exerciseList[index]['Exercise'].EnamePath?(audioUrl + exerciseList[index]['Exercise'].EnamePath):''}}" wx:else controls="true" name="" author=""></audio>
+
+            </view>
+            
+            
+        </view>
+
+        <view class="padding solid-bottom">
+            <view class="text-xl text-black text-bold">
+                学生答案
+            </view>
+            <view class="margin text-lg">
+                {{exerciseList[index]['Answer']!=""?exerciseList[index]['Answer']:"学生未作答"}}
+            </view>
+        </view>
+
+        <view class="padding solid-bottom" wx:if="{{exerciseList[index]['Answer']!=''}}">
+            <view class="text-xl text-black text-bold">
+                正确答案
+            </view>
+            <view class="margin text-lg">
+                {{exerciseList[index]['Exercise'].EanswerTxt}}
+            </view>
+            <view class="margin" wx:if="{{exerciseList[index]['Exercise'].EanswerPath!=''}}">
+                <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
+                    <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
+                </view>
+            </view>
+
+            <view class="text-xl text-black text-bold">
+                系统判题
+            </view>
+            <view class="margin text-lg">
+                {{exerciseList[index]['Judge']}}
+            </view>
+        </view>
+
+        <view class="flex padding">
+            <button class="flex-sub margin cu-btn bg-green shadow-blur round" @tap="clickLast()">上一题</button>
+            <view class="flex-sub margin"></view>
+            <button class="flex-sub margin cu-btn bg-green shadow-blur round" @tap="clickNext()">下一题</button>
+        </view>
+    </view>
+
+    <view wx:else>
+        <view class="flex justify-center">该学生今日没有题目</view>
+    </view>
+
+</template>
+    
+<script>
+import wepy from 'wepy'
+import Panel from '@/components/panel' // alias example
+
+export default class Exercise extends wepy.page{
+    config = {
+        usingComponents: {
+            "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
+            "mp-gallery": "weui-miniprogram/gallery/gallery",
+        }
+        
+    }
+
+    data={
+        Sid: null,
+        exerciseList: [],
+        index: 0,
+        imageUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
+        imageListOfName: [],
+        imageListOfAnswer: [],
+    }
+
+    methods = {
+        ViewImageOfName(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfName,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+
+        ViewImageOfAnswer(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfAnswer,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+
+        clickLast(){
+            let self = this
+            if(self.index!=0){
+                self.index--;
+            }
+        },
+
+        clickNext(){
+            let self = this
+            if(self.index!=self.exerciseList.length-1){
+                self.index++;
+            }
+        },
+
+        tapDialogButton(e) {
+            let self = this;
+            self.showOneButtonDialog = false
+        },
+
+    }
+
+    getTodayExercise(){
+        let self = this
+        let today = new Date()
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/today/get_today_exercise',
+            data:{
+                Sid:self.Sid,
+                Date:today.toLocaleDateString()
+            },
+            method: 'GET',
+            success:function(res) {
+                console.log(res)
+                self.exerciseList = res.data.Data
+                if(self.exerciseList!= null){
+                    self.inputDisabled = new Array(self.exerciseList.length)
+
+                    for(let i=0;i<self.exerciseList.length;i++){
+                        if(self.exerciseList[i]['Exercise'].EnamePath!=""){
+                            let tmpList = self.exerciseList[i]['Exercise'].EnamePath.split(";")
+                            self.imageListOfName = tmpList.map(x => self.imageUrl + x)
+                        }
+                        if(self.exerciseList[i]['Exercise'].EanswerPath!=""){
+                            let tmpList = self.exerciseList[i]['Exercise'].EanswerPath.split(";")
+                            self.imageListOfAnswer = tmpList.map(x => self.imageUrl + x)
+                        }
+                        if(self.exerciseList[i]["Answer"] != ""){
+                            self.inputDisabled[i] = true
+                        } else{
+                            self.inputDisabled[i] = false
+                        }
+                    }
+                    self.$apply()
+                }
+                
+            },
+        })
+    }
+    
+    onLoad(options) {
+        let self = this;
+
+        self.Sid = options.sid
+        
+        self.getTodayExercise()
+    } 
+}
+</script>

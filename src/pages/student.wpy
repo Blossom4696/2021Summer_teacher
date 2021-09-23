@@ -1,0 +1,160 @@
+<style>
+
+</style>
+
+<template>
+    <view class="flex bg-white padding justify-center text-center text-black text-lg text-bold">
+        学生列表
+    </view>
+    <view class="cu-bar search bg-white">
+        <view class="search-form round">
+            <text class="cuIcon-search"></text>
+            <input type="text" placeholder="搜索名字" confirm-type="search" @input="inputChangeSearch"></input>
+        </view>
+    </view>
+
+    <view class="flex bg-white" >
+        <view style="margin-left:140rpx"></view>
+        <view class="cu-item flex-sub {{index==fieldCur?'text-orange':''}} align-center flex justify-center" wx:for="{{studentField}}" wx:key wx:for-item="item" @tap="tabSelectIndex" data-id="{{index}}" data-name="subject">
+            <view>{{item}}</view>
+            
+            <image style="width:30rpx;height:30rpx" src="{{sortImg[index]}}"></image>
+        </view>
+            
+    </view>
+
+    <view wx:for="{{studentList}}" wx:key="index" wx:for-item="student" data-id="{{index}}" @tap="onClickStudent">
+        <view class="bg-white flex solid-bottom align-center">
+            <image class="cu-avatar round margin" src="{{imgUrl + student.Sicon}}">
+            </image>
+
+            <view class="flex-sub text-center">{{student.Snickname}}</view>
+            <view class="flex-sub text-center">{{student.SgradeName}}</view>
+            <view class="flex-sub text-center">
+                {{student.Cname}}
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.page{
+    data = {
+        studentList:[],
+        imgUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        noUserIcon : wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=none_userinfo.png',
+        studentField: ['姓名','年级','校区'],
+        fieldCur: 0,
+        sortImg:[
+            wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/sortup.png',
+            wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/sort.png',
+            wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/sort.png',
+        ],
+        searchString:"",
+    }
+    
+    methods = {
+        onClickStudent(e) {
+            let self = this
+            let studentId = e.currentTarget.dataset.id
+            wx.navigateTo({
+                url:"student-second?sid="+self.studentList[studentId].Sid,
+                
+            })
+        },
+
+        tabSelectIndex(e){
+            let self = this
+            let sortName = self.studentField[e.currentTarget.dataset.id]
+            let sortDir = ""
+            if(self.fieldCur== e.currentTarget.dataset.id){
+                let curDir = self.sortImg[self.fieldCur].indexOf("sortup")
+                if(curDir!=-1){
+                    self.sortImg[self.fieldCur] = self.sortImg[self.fieldCur].replace("up","down")
+                    sortDir = "desc"
+                }else{
+                    self.sortImg[self.fieldCur] = self.sortImg[self.fieldCur].replace("down","up")
+                    sortDir = "asc"
+                }
+                
+            }else{
+                // 首先替换为sort
+                self.sortImg[self.fieldCur] = self.sortImg[self.fieldCur].replace("down","").replace("up","")
+
+                self.fieldCur= e.currentTarget.dataset.id
+
+                // 再把选中的替换为sortup
+                self.sortImg[self.fieldCur] = self.sortImg[self.fieldCur].replace("sort","sortup")
+                sortDir = "asc"
+            }
+
+            self.getSortedStudentList(sortName,sortDir)
+        },
+
+        inputChangeSearch(e){
+            let self = this
+            self.searchString = e.detail.value
+            wepy.request({
+                    url:wepy.$instance.globalData.serverUrl + '/app/user/common/search_student_from_teacher',
+                    method:'GET',
+                    header: wepy.$instance.setHeader(),
+                    data:{
+                        word:e.detail.value,
+                    },
+                    success: function(res) {
+                        console.log(res)
+                        if (res.data.Code == 1){
+                            self.studentList = res.data.Data
+                            self.$apply()
+                        }
+                    }
+                })
+        }
+    }
+
+    getStudentData() {
+        let self = this
+        
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_student_list',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.studentList = res.data.Data
+                        self.$apply()
+                    }
+                }
+            })
+    }
+
+    getSortedStudentList(sortName,sortDir) {
+        let self = this
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_student_sorted_list',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                data:{
+                    word: self.searchString,
+                    sortName:sortName,
+                    sortDir:sortDir
+                },
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.studentList = res.data.Data
+                        self.$apply()
+                    }
+                }
+            })
+    }
+
+    onShow() {
+        let self = this
+        self.getStudentData()
+    }
+}
+</script>

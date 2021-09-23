@@ -1,4 +1,4 @@
-<!-- exercise.wpy -->
+<!-- wrongproblem.wpy -->
 <style lang="less">
 page {
   width: 100vw;
@@ -146,17 +146,16 @@ page {
 <template>
 <scroll-view scroll-y class="DrawerPage {{modalName=='viewModal'?'show':''}}">
     <view class="flex bg-white">
-        <view class="padding flex-sub text-left" @tap="onClickCreateExercise">
-            添加
+        <view class="padding flex-sub text-left" @tap="onClickCreateWrongProblem">
+            添加错题
         </view>
-        <view class="padding flex-sub text-center text-black text-lg text-bold">
-            习题列表
+        <view class="padding flex-sub text-center text-black text-lg text-bold" @tap="onClickWrongProblem">
+            错题列表
         </view>
         <view class="padding flex-sub text-right">
             
         </view>
     </view>
-
     <view class="cu-bar search bg-white">
         <view class="search-form round">
             <text class="cuIcon-search"></text>
@@ -164,14 +163,27 @@ page {
         </view>
     </view>
 
-    <view class="flex align-center">
-        <view class="flex-sub padding text-left">
+    <view class="cu-card">
+        <view class="cu-item shadow radius  bg-grey">
+            <view class="flex align-center">
+                <image class="cu-avatar round margin" src="{{ student.Sicon?imgUrl + student.Sicon:'' }}" background-size="cover"></image>
+                <view class="margin">
+                    <view class="text-black text-lg text-bold">{{ student.Snickname }}</view>
+                </view>        
+            </view>
+            
+            <view class="flex padding">
+                <view class="flex-sub text-black text-sm">年级：{{ student.SgradeName }}</view>
+                <view class="flex-sub text-black text-sm">校区：{{ student.Cname }}</view>
+            </view>
+        </view>
+    </view>
+    
+    <view class="flex">
+        <view class="flex-sub padding">
             <button class="cu-btn bg-{{isClickPrint?'grey':'green'}} shadow-blur round" @tap="clickPrint()">{{isClickPrint?'取消':'打印习题'}}</button>
         </view>
-        <view class="flex-sub padding flex align-center flex justify-center">
-            <checkbox wx:if="{{isClickPrint}}" @tap="checkboxChange" checked="{{isPrintAnswer}}">
-            <view wx:if="{{isClickPrint}}" class="margin-left-xs text-sm">打印答案</view>
-        </view>
+        <view class="flex-sub padding flex justify-center"></view>
         <view class="flex-sub padding flex justify-end">
             <button wx:if="{{isClickPrint}}" class="cu-btn bg-green shadow-blur round" @tap="clickPrintSubmut()">完成</button>
         </view>
@@ -188,7 +200,7 @@ page {
     
 
 
-    <view wx:for="{{exerciseList}}" wx:key="index" wx:for-item="exercise" data-id="{{index}}" >
+    <view wx:for="{{wrongProblemList}}" wx:key="index" wx:for-item="wrongProblem" data-id="{{index}}">
         <mp-slideview buttons="{{slideButtons}}" icon="{{true}}" bindbuttontap="slideButtonTap" data-index="{{index}}">
             
         <view class="padding-left padding-right bg-white solid-bottom" >
@@ -198,16 +210,16 @@ page {
                     <image style="width:30rpx;height:30rpx" src="{{selectIconOfExercise[index]}}"></image>
                 </view>
                 <!-- 中间 -->
-                <view class="flex-treble padding-sm" @tap="onClickExercise" data-id="{{index}}">
+                <view class="flex-treble padding-sm" @tap="onClickWrongProblem" data-id="{{index}}">
                     <!-- 里面两行，上面行 -->
                     <view class="exercise_upper">
                         <!-- 题目难度标签 -->
-                        <view class="cu-tag radius bg-{{difficultyColor[exercise.Edifficulty]}} light margin-right-xs">
-                            {{exercise.Edifficulty}}
+                        <view class="cu-tag radius bg-{{difficultyColor[wrongProblem.Wdifficulty]}} light margin-right-xs">
+                            {{wrongProblem.Wdifficulty}}
                         </view>
                         <!-- 题目title -->
                         <view class="title margin-lr-xs">
-                            {{exercise.Etitle}}
+                            {{wrongProblem.Wtitle}}
                         </view>
                         
                     </view>
@@ -215,17 +227,17 @@ page {
                     <!-- 下面行 -->
                     <view class="flex">
                         <view class="margin-right-xs">
-                            {{exercise.Esubject}}
+                            {{wrongProblem.Wsubject}}
                         </view>
                         <view class="margin-lr-xs">
-                            {{exercise.Etype}}
+                            {{wrongProblem.Wtype}}
                         </view>
                     </view>
                 </view>
                 <!-- 右半边 -->
-                <view class="flex-twice padding-sm" @tap="onClickExercise" data-id="{{index}}">
+                <view class="flex-twice padding-sm" @tap="onClickWrongProblem" data-id="{{index}}">
                     <view class="text-center text-xs">
-                        {{exercise.Egrade}}
+                        {{wrongProblem.Wgrade}}
                     </view>
                 </view>
             </view>
@@ -234,8 +246,8 @@ page {
     </view>
 </scroll-view>
 
-<mp-dialog title="删除习题" show="{{dialogShow}}" bindbuttontap="tapDeleteDialogButton" buttons="{{buttons}}" @close="dialogClose">
-      <view>确定要删除此习题吗？</view>
+<mp-dialog title="删除错题" show="{{dialogShow}}" bindbuttontap="tapDeleteDialogButton" buttons="{{buttons}}">
+      <view>确定要删除此错题吗？</view>
 </mp-dialog>
 
 <view class="DrawerClose {{modalName=='viewModal'?'show':''}}" @tap="hideModal">
@@ -245,7 +257,7 @@ page {
 <scroll-view scroll-y class="DrawerWindow {{modalName=='viewModal'?'show':''}}">
     <view class="flex padding">
         <view class="flex-sub padding">重置</view>
-        <view class="flex-sub padding text-center" style="font-weight:bold">筛选习题</view>
+        <view class="flex-sub padding text-center" style="font-weight:bold">筛选错题</view>
         <view class="flex-sub padding text-right" style="color:blue" @tap="hideModal">完成</view>
     </view>
     <view>
@@ -257,7 +269,7 @@ page {
         </view>
     </view>
     <view>
-        <view class="margin" style="font-weight:bold">习题难度</view>
+        <view class="margin" style="font-weight:bold">错题难度</view>
         <view class="grid col-{{exerciseField.Edifficulty.length>4?4:exerciseField.Edifficulty.length}} margin text-center">
             <view  wx:for="{{exerciseField.Edifficulty}}" wx:key>
                 <button class="round cu-btn lines-{{screenCur.difficultyCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="difficulty" data-id="{{index}}">{{exerciseField.Edifficulty[index]}}</button>
@@ -265,7 +277,7 @@ page {
         </view>
     </view>
     <view>
-        <view class="margin" style="font-weight:bold">习题类型</view>
+        <view class="margin" style="font-weight:bold">错题类型</view>
         <view class="margin">学科</view>
         <view class="grid col-{{exerciseField.Esubject.length>4?4:exerciseField.Esubject.length}} margin text-center">
             <view  wx:for="{{exerciseField.Esubject}}" wx:key>
@@ -290,9 +302,8 @@ page {
 </template>
 
 <script>
-  import wepy from 'wepy'
-
-  export default class Index extends wepy.page {
+import wepy from 'wepy'
+export default class Index extends wepy.page{
     config = {
         "usingComponents": {
             "mp-slideview": "weui-miniprogram/slideview/slideview",
@@ -300,9 +311,12 @@ page {
         }
     }
 
-    data = {
-        exerciseList:[],
-        exerciseField:{},
+    data={
+        Sid : -1,
+        student: {},
+        wrongProblemList : null,
+        exerciseField : null,
+        activeTab: 0,
         screenCur: {
             subjectCur: 0,
             difficultyCur: 0,
@@ -310,7 +324,6 @@ page {
             gradeCur: 0,
             unitCur: 0,
         },
-        exerciseIndex:-1,
         difficultyColor:{
             "简单":"cyan",
             "中等":"olive",
@@ -332,28 +345,40 @@ page {
             }],
         dialogShow: false,
         deleteIndex:-1,
+        imgUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
         isClickPrint :false,
         selectIcon:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/select.png',
         nonselectIcon:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/nonselect.png',
         selectIconOfExercise: [],
-        isPrintAnswer: false,
     }
 
-    methods = {
-        tabSelectIndex(e){
+    methods={
+        onTabClick(e) {
             let self = this
-            self.screenCur[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
-            self.methods.getExerciseSort(self)
+            let index = e.detail.index
+            self.activeTab= index
         },
 
-        tabSelect(e) {
+        onTabChange(e) {
             let self = this
-            self.screenCur[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
+            let index = e.detail.index
+            self.activeTab= index
         },
 
         onClickSelectIcon(e) {
             let self = this
             self.selectIconOfExercise[e.currentTarget.dataset.id] = self.selectIconOfExercise[e.currentTarget.dataset.id] == self.selectIcon ? self.nonselectIcon : self.selectIcon
+        },
+
+        tabSelectIndex(e){
+            let self = this
+            self.screenCur[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
+            self.getSortedWrongProblem(self)
+        },
+
+        tabSelect(e) {
+            let self = this
+            self.screenCur[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
         },
 
         showModal(e) {
@@ -364,7 +389,7 @@ page {
         hideModal(e) {
             let self = this
             self.modalName= null
-            self.methods.getExerciseSort(self)
+            self.getSortedWrongProblem()
         },
 
         slideButtonTap(e) {
@@ -377,32 +402,24 @@ page {
             let self = this
             self.dialogShow = false
             if (e.detail.index == 1) {
-                self.methods.deleteExercise(self)
+                self.deleteWrongProblem()
             }
         },
 
-        dialogClose(e){
+        onClickWrongProblem(e) {
             let self = this
-            self.dialogShow = false
-        },
-
-        checkboxChange(e){
-            let self = this
-            self.isPrintAnswer = self.isPrintAnswer?false:true
-        },
-
-        onClickExercise(e) {
-            let self = this
-            self.exerciseIndex = e.currentTarget.dataset.id
+            let exerciseIndex = e.currentTarget.dataset.id
             wx.navigateTo({
-                url:"exercise-detail?eid="+self.exerciseList[self.exerciseIndex].Eid,
+                url:"wrongproblem-detail?wid="+self.wrongProblemList[exerciseIndex].Wid + "&sname="+self.student.Snickname,
                 
             })
         },
 
-        onClickCreateExercise(e) {
-            console.log(e)
-            this.$navigate({url:"create-exercise"})
+        onClickCreateWrongProblem(e) {
+            let self = this
+            wx.navigateTo({
+                url:"create-wrongproblem?sid="+self.Sid,
+            })
         },
 
         clickPrint(){
@@ -414,25 +431,24 @@ page {
             let self = this
             self.isClickPrint = false
 
-            let eidList = []
+            let widList = []
             for(let i=0;i<self.selectIconOfExercise.length;i++){
                 if(self.selectIconOfExercise[i] == self.selectIcon){
-                    eidList.push(self.exerciseList[i].Eid)
+                    widList.push(self.wrongProblemList[i].Wid)
                 }
             }
-            
-            console.log(eidList)
-            if(eidList.length == 0){
+
+            console.log(widList)
+            if(widList.length == 0){
                 return
             }
 
             wepy.request({
-                    url:wepy.$instance.globalData.serverUrl + '/app/teacher/generate_exercise_pdf',
+                    url:wepy.$instance.globalData.serverUrl + '/app/teacher/generate_wrong_problem_pdf',
                     method:'GET',
                     header: wepy.$instance.setHeader(),
                     data:{
-                        Eids:eidList,
-                        isPrintAnswer: self.isPrintAnswer==true?"1":"0",
+                        Wids:widList
                     },
                     success: function(res) {
                         console.log(res)
@@ -450,96 +466,23 @@ page {
                     }
                 })
         },
-
-        getExercise(self) {
-            wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/exercise/get_all_exercise',
-                method:'GET',
-                header: wepy.$instance.setHeader(),
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        self.exerciseList = res.data.Data
-                        self.selectIconOfExercise = []
-                        for(let i=0;i<self.exerciseList.length;i++){
-                            self.selectIconOfExercise.push(self.nonselectIcon)
-                        }
-                        self.$apply()
-                    }
-                }
-            })
-        },
-
-        getExerciseField(self) {
-            wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/user/common/get_exercise_field',
-                method:'GET',
-                header: wepy.$instance.setHeader(),
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        self.exerciseField = res.data.Data
-                        self.$apply()
-                    }
-                }
-            })
-        },
-
-        getExerciseSort(self) {
-            wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/exercise/get_sorted_exercise',
-                method:'GET',
-                header: wepy.$instance.setHeader(),
-                data:{
-                    subject:self.exerciseField.Esubject[self.screenCur.subjectCur],
-                    type:self.exerciseField.Etype[self.exerciseField.Esubject[self.screenCur.subjectCur]][self.screenCur.typeCur],
-                    unit:self.exerciseField.Eunit[self.exerciseField.Esubject[self.screenCur.subjectCur]][self.screenCur.unitCur],
-                    difficulty:self.exerciseField.Edifficulty[self.screenCur.difficultyCur],
-                    grade:self.exerciseField.Egrade[self.screenCur.gradeCur],
-                },
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        self.exerciseList = res.data.Data
-                        self.$apply()
-                    }
-                }
-            })
-        },
-
-        deleteExercise(self) {
-            if(self.deleteIndex == -1) return
-            wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/exercise/delete_exercise/:id' + '?Eid=' + self.exerciseList[self.deleteIndex].Eid.toString(),
-                method:'DELETE',
-                header: wepy.$instance.setHeader(),
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        wx.showToast({
-                            title:'删除成功'
-                        })
-                        self.methods.getExercise(self)
-                        self.methods.getExerciseField(self)
-                    }
-                }
-            })
-        },
+        
 
         inputChangeSearch(e){
             let self = this
 
             wepy.request({
-                    url:wepy.$instance.globalData.serverUrl + '/app/user/common/search_exercise',
+                    url:wepy.$instance.globalData.serverUrl + '/app/user/common/search_wrong_problem',
                     method:'GET',
                     header: wepy.$instance.setHeader(),
                     data:{
+                        Sid: self.Sid,
                         word:e.detail.value,
                     },
                     success: function(res) {
                         console.log(res)
                         if (res.data.Code == 1){
-                            self.exerciseList = res.data.Data
+                            self.wrongProblemList = res.data.Data
                             self.$apply()
                         }
                     }
@@ -585,17 +528,120 @@ page {
         })
     }
 
-    onLoad(){
-
+    getWrongProblem() {
+        let self = this
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/get_wrong_problem_list',
+            method:'GET',
+            data:{
+                Sid:self.Sid
+            },
+            header: wepy.$instance.setHeader(),
+            success: function(res) {
+                console.log(res)
+                if (res.data.Code == 1){
+                    self.wrongProblemList = res.data.Data
+                    self.selectIconOfExercise = []
+                    for(let i=0;i<self.wrongProblemList.length;i++){
+                        self.selectIconOfExercise.push(self.nonselectIcon)
+                    }
+                    self.$apply()
+                }
+            }
+        })
     }
 
-    onShow() {
+    getExerciseField() {
         let self = this
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/user/common/get_exercise_field',
+            method:'GET',
+            header: wepy.$instance.setHeader(),
+            success: function(res) {
+                console.log(res)
+                if (res.data.Code == 1){
+                    self.exerciseField = res.data.Data
+                    self.$apply()
+                }
+            }
+        })
+    }
 
-        self.methods.getExercise(self)
-        self.methods.getExerciseField(self)
+    getSortedWrongProblem() {
+        let self = this
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/get_sorted_wrong_problem',
+            method:'GET',
+            header: wepy.$instance.setHeader(),
+            data:{
+                Sid: self.Sid,
+                subject:self.exerciseField.Esubject[self.screenCur.subjectCur],
+                type:self.exerciseField.Etype[self.exerciseField.Esubject[self.screenCur.subjectCur]][self.screenCur.typeCur],
+                unit:self.exerciseField.Eunit[self.exerciseField.Esubject[self.screenCur.subjectCur]][self.screenCur.unitCur],
+                difficulty:self.exerciseField.Edifficulty[self.screenCur.difficultyCur],
+                grade:self.exerciseField.Egrade[self.screenCur.gradeCur],
+            },
+            success: function(res) {
+                if (res.data.Code == 1){
+                    self.wrongProblemList = res.data.Data
+                    self.$apply()
+                }
+            }
+        })
+    }
+
+    deleteWrongProblem() {
+        let self = this
+        if(self.deleteIndex == -1) return
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/delete_wrong_problem/:id' + '?Wid=' + self.wrongProblemList[self.deleteIndex].Wid.toString(),
+            method:'DELETE',
+            header: wepy.$instance.setHeader(),
+            success: function(res) {
+                console.log(res)
+                if (res.data.Code == 1){
+                    wx.showToast({
+                        title:'删除成功'
+                    })
+                    self.getWrongProblem()
+                    self.getExerciseField()
+                }
+            }
+        })
+    }
+
+    getStudentData() {
+        let self = this
+        wepy.request({
+            url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_student',
+            method:'GET',
+            header: wepy.$instance.setHeader(),
+            data:{
+                Sid:self.Sid
+            },
+            success: function(res) {
+                console.log(res)
+                if (res.data.Code == 1){
+                    self.student = res.data.Data
+                    self.$apply()
+                }
+            }
+        })
+    }
+
+    onLoad(options) {
+        let self = this
+        console.log(options)
+
+        self.Sid = options.sid
+    }
+
+    onShow(options) {
+        let self = this
+        self.getWrongProblem()
+        self.getExerciseField()
+        self.getStudentData()
         
     }
-  }
-
+}
 </script>
