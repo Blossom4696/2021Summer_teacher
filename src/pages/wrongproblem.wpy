@@ -145,10 +145,10 @@ page {
 
 <template>
 <scroll-view scroll-y class="DrawerPage {{modalName=='viewModal'?'show':''}}">
-    <view class="flex bg-white">
-        <view class="padding flex-sub text-left" @tap="onClickCreateWrongProblem">
+    <view class="flex bg-white align-center padding">
+        <button class="cu-btn bg-blue round shadow flex-sub"  @tap="onClickCreateWrongProblem">
             添加错题
-        </view>
+        </button>
         <view class="padding flex-sub text-center text-black text-lg text-bold" @tap="onClickWrongProblem">
             错题列表
         </view>
@@ -189,13 +189,16 @@ page {
         </view>
     </view>
 
-    <view class="justify-between flex bg-white">
+    <view class="justify-between flex bg-white align-center padding-lr-xs">
         <scroll-view class="bg-white nav" scroll-x scroll-with-animation style="width:90vw">
             <view class="cu-item {{index==screenCur.subjectCur?'text-orange cur':''}}" wx:for="{{exerciseField.Esubject}}" wx:key wx:for-item="item" @tap="tabSelectIndex" data-id="{{index}}" data-name="subject">
                 {{item}}
             </view>
         </scroll-view>
-        <image class="bg-white margin" style="width:40rpx;height:40rpx" src="{{imageScreen}}" @tap="showModal" data-target="viewModal"/>
+        <view class="bg-white margin-tb solid-left flex align-center" @tap="showModal" data-target="viewModal">
+            <view class="margin-lr-xs text-sm">筛选</view>
+            <image class="" style="width:40rpx;height:40rpx" src="{{imageScreen}}"/>
+        </view>
     </view>
     
 

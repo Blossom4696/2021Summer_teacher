@@ -5,6 +5,14 @@ page{
 </style>
 
 <template>
+    <view class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="flex-sub flex justify-start">
+                <button class="cu-btn bg-olive round shadow" @tap="onClickEditWrongProblem">编辑习题</button>
+            </view>
+        </view>
+    </view>
+
     <view class="solid-bottom padding">
         <view class="text-black text-xl text-bold text-cut">
             {{Sname}}的错题
@@ -37,7 +45,7 @@ page{
                 </view>
             </view>
             
-            <audio src="{{wrongProblem.WproblemPath?(audioUrl + wrongProblem.WproblemPath):''}}" wx:else controls="true" name="" author=""></audio>
+            <audio wx:if="{{wrongProblem.Wtype=='听写' && wrongProblem.WproblemPath!=''}}" src="{{wrongProblem.WproblemPath?(audioUrl + wrongProblem.WproblemPath):''}}" controls="true" name="" author=""></audio>
 
             
         </view>
@@ -49,11 +57,11 @@ page{
             正确答案
         </view>
 
-        <view class="margin text-lg" wx:if="{{wrongProblem.WanswerTxt!=''}}">
+        <view class="margin text-lg" wx:if="{{wrongProblem.WanswerTxt!='null'}}">
             {{wrongProblem.WanswerTxt}}
         </view>
 
-        <view class="margin" wx:if="{{wrongProblem.WanswerPath!=''}}">
+        <view class="margin" wx:if="{{wrongProblem.WanswerPath!='null'}}">
             <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
                 <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
             </view>
@@ -65,21 +73,24 @@ page{
             我的答案
         </view>
 
-        <view class="margin text-lg" wx:if="{{wrongProblem.WmyAnswerTxt!=''}}">
+        <view class="margin text-lg" wx:if="{{wrongProblem.WmyAnswerTxt!='null'}}">
             {{wrongProblem.WmyAnswerTxt}}
         </view>
-        <view class="margin text-lg" wx:else>
-            学生未作答
-        </view>
 
-        <view class="margin" wx:if="{{wrongProblem.WmyAnswerPath!=''}}">
-            <!-- <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
-                <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
-            </view> -->
+        <view class="margin" wx:if="{{wrongProblem.WmyAnswerPath!='null'}}">
+            <view wx:for="{{imageListOfMyAnswer}}" wx:key="index" wx:for-item="imgOfMyAnswer">
+                <image src="{{imgOfMyAnswer!=imageUrl?imgOfMyAnswer:''}}" mode="widthFix" @tap="ViewImageOfMyAnswer" data-url="{{imgOfMyAnswer}}"></image>
+            </view>
         </view>
     </view>
     
-   
+    <view class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="padding flex-sub flex justify-center">
+                <button class="cu-btn bg-red round shadow lg" @tap="onClickDeleteWrongProblem">删除错题</button>
+            </view>
+        </view>
+    </view>
     
 
 </template>
@@ -101,6 +112,7 @@ export default class Index extends wepy.page {
         audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
         imageListOfName: [],
         imageListOfAnswer: [],
+        imageListOfMyAnswer: [],
     }
 
     methods = {
@@ -122,13 +134,63 @@ export default class Index extends wepy.page {
                 current: self.imageUrl + e.currentTarget.dataset.url
             });
         },
+
+        ViewImageOfMyAnswer(e) {
+            let self = this
+            console.log(self.imageUrl + e.currentTarget.dataset.url)
+            wx.previewImage({
+                urls: self.imageListOfMyAnswer,
+                current: self.imageUrl + e.currentTarget.dataset.url
+            });
+        },
+        
+        onClickEditWrongProblem(e){
+            let self = this
+            wx.navigateTo({
+                url:"edit-wrongproblem?wid="+self.wrongProblem.Wid,
+            })
+        },
+
+        onClickDeleteWrongProblem(){
+            let self = this
+            wx.showModal({
+                title: '删除错题',
+                content: '确定要删除此错题？',
+                cancelText: '取消',
+                confirmText: '确定',
+                success: res => {
+                    if (res.confirm) {
+                        wepy.request({
+                            url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/delete_wrong_problem/:id' + '?Wid=' + self.wrongProblem.Wid.toString(),
+                            method:'DELETE',
+                            header: wepy.$instance.setHeader(),
+                            success: function(res) {
+                                console.log(res)
+                                if (res.data.Code == 1){
+                                    wepy.showToast({
+                                        title: '删除成功', //提示的内容,
+                                        icon: 'success', //图标,
+                                        duration: 2000, //延迟时间,
+                                        mask: true, //显示透明蒙层，防止触摸穿透,
+                                        success: function(){
+                                            setTimeout(function(){
+                                                wepy.navigateBack({
+                                                    delta: 1
+                                                })
+                                            }, 1000)
+                                        },
+                                    });
+                                }
+                            }
+                        })
+                    }
+                }
+            })
+        }
     }
 
-    onLoad(options) {
+    getWrongProblem(){
         let self = this
-
-        self.Wid = options.wid
-        self.Sname = options.sname
 
         wepy.request({
                 url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/get_wrong_problem',
@@ -150,10 +212,26 @@ export default class Index extends wepy.page {
                             let tmpList = res.data.Data.WanswerPath.split(";")
                             self.imageListOfAnswer = tmpList.map(x => self.imageUrl + x)
                         }
+                        if(res.data.Data.WmyAnswerPath!=""){
+                            let tmpList = res.data.Data.WmyAnswerPath.split(";")
+                            self.imageListOfMyAnswer = tmpList.map(x => self.imageUrl + x)
+                        }
                         self.$apply()
                     }
                 }
             })
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Wid = options.wid
+        self.Sname = options.sname
+    }
+
+    onShow(){
+        let self = this
+        self.getWrongProblem()
     }
 }
 </script>

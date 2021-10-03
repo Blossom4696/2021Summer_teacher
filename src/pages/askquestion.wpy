@@ -1,0 +1,160 @@
+<!-- index.wpy -->
+<style>
+</style>
+
+<template>
+<view class="cu-card">
+    <view class="cu-item">
+        <radio-group class="flex padding" bindchange="dateRadioChange" > 
+            <view class="flex-sub flex align-center" wx:for="{{dateList}}" wx:key="{{item.value}}">
+                <view class="margin-xs">
+                    <radio value="{{item.value}}" checked="{{item.checked}}" />
+                </view>
+                <view class="">{{item.name}}</view>
+            </view>
+        </radio-group>
+    </view>
+
+   
+    <view class="cu-item">
+        <view class="cu-list menu card-menuradius shadow">
+            <view class="cu-item arrow align-center">
+                <view class="content">
+                    <view>学生提问</view>
+                </view>
+                <checkbox-group class="flex padding" bindchange="solvedCheckboxChange" > 
+                    <view class="margin-right-lg align-center flex">
+                        <checkbox value="cb" checked="{{isSolved}}" />
+                        <view>已解决</view>
+                    </view>
+                </checkbox-group>
+                <view class="flex justify-end">
+                    更多
+                </view>
+            </view>
+        </view>
+        <view class="cu-list menu card-menuradius shadow">
+            <view class="cu-item flex align-center" wx:for="{{askQuestionList}}" wx:key="index" wx:for-item="askQuestion" data-id="{{index}}" @tap="onClickAskQuestion">
+                <view class="flex-sub">
+                    <view class="text-center">{{askQuestion.Snickname}}</view>
+                </view>
+                <view class="flex-treble">
+                    <view class="text-center">{{askQuestion.Etitle}}</view>
+                </view>
+                <view class="flex-twice">
+                    <view class="text-center">{{askQuestion.AQtime}}</view>
+                </view>
+                <view class="flex-sub">
+                    <view class="text-center text-{{askQuestion.AQisSolved==1?'black':'red'}}">{{askQuestion.AQisSolved==1?'已解决':'未解决'}}</view>
+                </view>
+                
+            </view>
+        </view>
+    </view>
+
+</view>
+
+</template>
+
+<script>
+import wepy from 'wepy'
+import moment from 'moment'
+
+export default class Index extends wepy.page {
+    data={
+        askQuestionList:[],
+        dateList:[{
+            value: "day",
+            name: "近一天",
+            checked: false,
+        },{
+            value: "week",
+            name: "近七天",
+            checked: false,
+        },{
+            value: "month",
+            name: "近一月",
+            checked: false,
+        },{
+            value: "all",
+            name: "全部",
+            checked: true,
+        }],
+        isSolved: false,
+    }
+
+    methods={
+        onClickAskQuestion(e){
+			let self = this
+            let id = e.currentTarget.dataset.id
+            wx.navigateTo({
+                url:"askquestion-detail?aqid="+self.askQuestionList[id].AQid,
+                
+            })
+		},
+
+        dateRadioChange(e) {
+            let self = this
+            console.log('radio发生change事件，携带value值为：', e.detail.value)
+
+            for (let i = 0, len = self.dateList.length; i < len; ++i) {
+                self.dateList[i].checked = self.dateList[i].value === e.detail.value
+            }
+            self.getAskQuestionList()
+
+        },
+
+        solvedCheckboxChange(e){
+            let self = this
+            self.isSolved = self.isSolved?false:true
+            self.getAskQuestionList()
+        },
+
+
+    }
+
+    getAskQuestionList(){
+		let self = this
+        
+        let queryDate = "all"
+        for(let i=0;i<self.dateList.length;i++){
+            if(self.dateList[i].checked == true){
+                queryDate = self.dateList[i].value
+            }
+        }
+
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_ask_question_list',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                data:{
+					unresolved: self.isSolved?"1":"0",
+                    date: queryDate,
+				},
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.askQuestionList = res.data.Data
+
+						for(let i=0;i<self.askQuestionList.length;i++){
+							self.askQuestionList[i].AQtime = moment(self.askQuestionList[i].AQtime).format('YYYY-MM-DD HH:mm:ss')
+						}
+                        self.$apply()
+                    }
+                }
+            })
+	}
+
+    onLoad() {
+        
+    }
+
+    onShow() {
+        let self = this
+        self.getAskQuestionList()
+    }
+}
+
+    
+
+</script>

@@ -20,7 +20,15 @@
 </style>
 
 <template>
-    <view wx:if="{{exerciseList!=null}}">
+    <view class="flex bg-white align-center padding">
+
+        <view class="padding flex-sub text-center text-black text-lg text-bold">
+            学生今日做题情况
+        </view>
+
+    </view>
+
+    <view wx:if="{{exerciseList.length!=0}}">
         
         <view class="solid-bottom padding">
             <view class="text-black text-xl text-bold text-cut">
@@ -96,8 +104,8 @@
         </view>
     </view>
 
-    <view wx:else>
-        <view class="flex justify-center">该学生今日没有题目</view>
+    <view wx:else class="margin padding">
+        <view class="flex justify-center text-bold text-lg">该学生今日没有题目</view>
     </view>
 
 </template>
@@ -177,8 +185,9 @@ export default class Exercise extends wepy.page{
             method: 'GET',
             success:function(res) {
                 console.log(res)
-                self.exerciseList = res.data.Data
-                if(self.exerciseList!= null){
+                
+                if(res.data.Code != 2 && res.data.Msg != "No exercise!"){
+                    self.exerciseList = res.data.Data
                     self.inputDisabled = new Array(self.exerciseList.length)
 
                     for(let i=0;i<self.exerciseList.length;i++){

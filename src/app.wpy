@@ -26,15 +26,19 @@ export default class extends wepy.app {
       'pages/exercise',
       'pages/exercise-detail',
       'pages/create-exercise',
+      'pages/edit-exercise',
       'pages/student',
       'pages/student-second',
       'pages/wrongproblem',
       'pages/wrongproblem-detail',
       'pages/create-wrongproblem',
+      'pages/edit-wrongproblem',
       'pages/todaygrade',
       'pages/create-todayexercise',
       'pages/learnsituation',
       'pages/my',
+      'pages/edit-password',
+      'pages/askquestion',
       'pages/askquestion-detail',
     ],
     window: {
@@ -75,7 +79,7 @@ export default class extends wepy.app {
 
   globalData = {
     userInfo: null,
-    serverUrl: "http://1.116.126.208:8080",
+    serverUrl: "https://www.bigby.love:8080",
   }
 
   onLaunch() {
@@ -85,6 +89,8 @@ export default class extends wepy.app {
 
     if(wepy.getStorageSync("sessionUserInfo")){
       this.globalData.userInfo = wepy.getStorageSync("sessionUserInfo")
+    }else{
+      this.globalData.userInfo = null
     }
     
   }

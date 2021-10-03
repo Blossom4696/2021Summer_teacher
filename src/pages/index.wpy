@@ -1,39 +1,5 @@
 <!-- index.wpy -->
-<style lang="less">
-  .tab-bar{
-    position:fixed;
-    bottom:0;
-    width:100%;
-  }
-
-  .header{
-    height:30vh;
-    position: relative;
-  }
-
-  .userinfo {
-    display: flex;
-    flex-direction: row;
-    position:absolute;
-    top:30%;
-    transform: translateY(-50%);
-    margin:50rpx;
-    // align-items: center;
-  }
-
-  .userinfo-avatar {
-    width: 120rpx;
-    height: 120rpx;
-    border-radius: 50%;
-    margin:20rpx;
-  }
-
-  .userinfo-other {
-    color: #aaa;
-    margin:20rpx;
-    // line-height: 120rpx;
-  }
-
+<style>
 </style>
 
 <template>
@@ -43,31 +9,34 @@
 			<view class="flex align-center" @tap="onClickLogin">
 				<image style="width:50rpx;height:50rpx" class="margin margin-lr" src="{{userInfo==null?teacherIconNoLogin:imgUrl + userInfo.Ticon}}" background-size="cover"/>
 				<view class="margin">
-                    <view class="text-black text-xl text-bold">{{ userInfo==null?'未登录':userInfo.Tnickname}}</view>
+                    <view class="text-black text-xl text-bold">{{ userInfo==null?'教师未登录（点击登录）':userInfo.Tnickname}}</view>
                 </view>   
 			</view>
 		</view>
 		<view wx:if="{{userInfo!=null}}" class="cu-item margin-top-xl margin-bottom-xl">
             <view class="cu-list menu card-menuradius shadow">
-                <view class="cu-item arrow">
-                    <view class="content" data-url="create-todayexercise" @tap="onClick">
+                <view class="cu-item arrow" data-url="create-todayexercise" @tap="onClick">
+                    <view class="content">
                         <view>布置今日习题</view>
                     </view>
                 </view>
-                <view class="cu-item arrow">
-                    <view class="content" data-url="student" @tap="onClick">
-                        <view>学生管理</view>
+                <view class="cu-item arrow" data-url="student" @tap="onClick">
+                    <view class="content">
+                        <view>学生管理（今日习题、错题、学情）</view>
                     </view>
                 </view>
             </view>
         </view>
 
 		<view wx:if="{{userInfo!=null}}" class="cu-item margin-top-xl margin-bottom-xl">
-			<view class="cu-item arrow">
+			<view class="cu-item">
 				<view class="cu-list menu card-menuradius shadow">
-					<view class="cu-item arrow">
+					<view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
 						<view class="content">
 							<view>学生提问</view>
+						</view>
+						<view class="flex justify-end">
+							更多
 						</view>
 					</view>
 				</view>
@@ -132,7 +101,10 @@
         },
 
 		onClickLogin() {
-			this.$navigate({url:"login"})
+			let self = this
+			if(self.userInfo==null){
+				this.$navigate({url:"login"})
+			}
 		},
 
 
@@ -169,7 +141,10 @@
                 url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_ask_question_list',
                 method:'GET',
                 header: wepy.$instance.setHeader(),
-                
+                data:{
+					unresolved: "0",
+					date:"all",
+				},
                 success: function(res) {
                     console.log(res)
                     if (res.data.Code == 1){
@@ -188,7 +163,7 @@
 
     onLoad() {
       	let self = this
-      
+		
     }
 
     onShow() {
@@ -197,10 +172,12 @@
       if(wepy.$instance.globalData.userInfo!=null){
         self.userInfo = wepy.$instance.globalData.userInfo
 		self.getAskQuestionList()
-      }
+      }else{
+		  self.userInfo=null
+	  }
       if(self.userInfo==null && !self.dialogShowOneButton){
-        self.dialogShow = true
-      }
+			self.dialogShow = true
+		}
     }
   }
 

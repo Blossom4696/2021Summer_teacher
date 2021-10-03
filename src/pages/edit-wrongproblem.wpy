@@ -46,7 +46,7 @@
             <view class="padding flex-sub">
             </view>
             <view class="padding flex-sub text-center text-black text-lg text-bold">
-                添加错题
+                编辑错题
             </view>
             <view class="padding flex-sub text-right">
                 
@@ -54,18 +54,18 @@
         </view>
         <view class="cu-form-group">
             <view class="title">标题</view>
-            <input name="Wtitle" placeholder="习题标题用于列表展示"></input>
+            <input name="Wtitle" placeholder="习题标题用于列表展示" value="{{wrongproblem.Wtitle}}"></input>
         </view>
         <view class="cu-form-group">
             <view class="title">描述</view>
-            <input name="Wdescription" placeholder="题目提示信息"></input>
+            <input name="Wdescription" placeholder="题目提示信息" value="{{wrongproblem.Wdescription}}"></input>
         </view>
 
         <view class="cu-form-group">
             <view class="title">年级</view>
             <picker bindchange="pickerGradeChange" name="Wgrade" value="{{gradePicker[gradeIndex]}}" range="{{gradePicker}}">
                 <view class="picker">
-                    <text class="text-lg">{{gradeIndex?gradePicker[gradeIndex]:'选择题目的年级'}}</text>
+                    <text class="text-lg">{{gradeIndex?gradePicker[gradeIndex]:wrongproblem.Wgrade}}</text>
                 </view>
             </picker>
         </view>
@@ -74,7 +74,7 @@
             <view class="title">科目</view>
             <picker bindchange="pickerSubjectChange" name="Wsubject" value="{{subjectPicker[subjectIndex]}}" range="{{subjectPicker}}">
                 <view class="picker">
-                    <text class="text-lg">{{subjectIndex?subjectPicker[subjectIndex]:'选择题目的科目'}}</text>
+                    <text class="text-lg">{{subjectIndex?subjectPicker[subjectIndex]:wrongproblem.Wsubject}}</text>
                 </view>
             </picker>
         </view>
@@ -83,14 +83,14 @@
             <view class="title">类型</view>
             <picker bindchange="pickerTypeChange" name="Wtype" value="{{typePicker[subjectPicker[subjectIndex]][typeIndex]}}" range="{{typePicker[subjectPicker[subjectIndex]]}}">
                 <view class="picker">
-                    <text class="text-lg">{{typeIndex?typePicker[subjectPicker[subjectIndex]][typeIndex]:'选择题目的类型'}}</text>
+                    <text class="text-lg">{{typeIndex?typePicker[subjectPicker[subjectIndex]][typeIndex]:wrongproblem.Wtype}}</text>
                 </view>
             </picker>
         </view>
 
         <view class="cu-form-group">
             <view class="title">习题题目文字</view>
-            <input name="WproblemTxt" placeholder="习题题目文字"></input>
+            <input name="WproblemTxt" placeholder="习题题目文字" value="{{wrongproblem.WproblemTxt}}"></input>
         </view>
 
         <view wx:if="{{typePicker[subjectPicker[subjectIndex]][typeIndex]!='听写'}}" class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
@@ -140,14 +140,13 @@
                 上传音频
             </button>
             <view>（仅限MP3文件）</view>
-            <view>{{audioName==null?'无音频文件':audioName}}</view>
+            <view>{{audioUploadPath==null?'无音频文件':audioName}}</view>
         </view>
 
         <view wx:if="{{typePicker[subjectPicker[subjectIndex]][typeIndex]=='听写' && audioSelectList[1].checked}}" class="cu-form-group">
             <button class="cu-btn bg-green shadow" @touchstart="startRecord" @touchend="endRecord">
                 点击录音
             </button>
-            <button class="cu-btn bg-{{audioUploadPath!=''?'green':'grey'}} shadow" @tap="onClickPlayRecord">播放录音</button>
             <view wx:if="{{audioUploadPath!=''}}" class="action">{{duration}}</view>
             <view wx:else class="action">0'000s</view>
         </view>
@@ -155,7 +154,7 @@
 
         <view class="cu-form-group">
             <view class="title">习题答案文字</view>
-            <input name="WanswerTxt" placeholder="习题答案文字"></input>
+            <input name="WanswerTxt" placeholder="习题答案文字" value="{{wrongproblem.WanswerTxt}}"></input>
         </view>
 
         <view class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
@@ -183,7 +182,7 @@
 
         <view class="cu-form-group">
             <view class="title">学生作答(文字)</view>
-            <input name="WmyAnswerTxt" placeholder="学生作答文字"></input>
+            <input name="WmyAnswerTxt" placeholder="学生作答文字" value="{{wrongproblem.WmyAnswerTxt}}"></input>
         </view>
 
         <view class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
@@ -211,7 +210,7 @@
 
         <view class="cu-form-group">
             <view class="title">难度</view>
-            <picker bindchange="pickerDifficultyChange" name="Wdifficulty" value="{{difficultyPicker[difficultyIndex]}}" range="{{difficultyPicker}}">
+            <picker bindchange="pickerDifficultyChange" name="Wdifficulty" value="{{wrongproblem.Wdifficulty}}" range="{{difficultyPicker}}">
                 <view class="picker">
                     <text class="text-lg">{{difficultyPicker[difficultyIndex]}}</text>
                 </view>
@@ -220,10 +219,10 @@
 
         <view class="cu-form-group">
             <view class="title">单元</view>
-            <input name="Wunit" placeholder="【选填】一单元、二单元"></input>
+            <input name="Wunit" placeholder="【选填】一单元、二单元" value="{{wrongproblem.Wunit}}"></input>
         </view>
         <view class="padding flex justify-center bg-white">
-            <button class="cu-btn bg-green shadow lg" form-type="submit">上传错题</button>
+            <button class="cu-btn bg-green shadow lg" form-type="submit">提交修改</button>
         </view>
     </form>
 </template>
@@ -234,7 +233,10 @@ const innerAudioContext = wx.createInnerAudioContext()
 import wepy from 'wepy'
 export default class Index extends wepy.page{
     data={
-        Sid: -1,
+        wrongproblem:{},
+        imageUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
+        Wid: -1,
         radioGroupItems: [
             {value:'from-db', name:'从习题库中选取', checked: true},
             {value:'from-self', name:'自行添加', checked: false}
@@ -427,7 +429,7 @@ export default class Index extends wepy.page{
             let self = this
 
             let sendFormData = e.detail.value // form 表单数据
-            sendFormData["Sid"] = Number(self.Sid)
+            sendFormData["Wid"] = Number(self.Wid)
             
             let successUp = 0; //成功
             let failUp = 0; //失败
@@ -509,15 +511,15 @@ export default class Index extends wepy.page{
 
             if(failUp == 0) {
                 wepy.request({
-                    url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/insert_wrong_problem',
-                    method:'POST',
+                    url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/update_wrong_problem',
+                    method:'PUT',
                     data: sendFormData,
                     header: wepy.$instance.setHeader(),
                     success: function(res) {
                         console.log(res)
                         if (res.data.Code == 1){
                             wepy.showToast({
-                                title: '创建成功', //提示的内容,
+                                title: '修改成功', //提示的内容,
                                 icon: 'success', //图标,
                                 duration: 2000, //延迟时间,
                                 mask: true, //显示透明蒙层，防止触摸穿透,
@@ -595,10 +597,70 @@ export default class Index extends wepy.page{
         });
     }
 
+    findIndex(){
+        let self = this
+        for(let i=0;i<self.gradePicker.length;i++){
+            if(self.gradePicker[i] == self.wrongproblem.Wgrade){
+                self.gradeIndex = i
+            }
+        }
+        for(let i=0;i<self.subjectPicker.length;i++){
+            if(self.subjectPicker[i] == self.wrongproblem.Wsubject){
+                self.subjectIndex = i
+            }
+        }
+        for(let i=0;i<self.typePicker[self.subjectPicker[self.subjectIndex]].length;i++){
+            if(self.typePicker[self.subjectPicker[self.subjectIndex]][i] == self.wrongproblem.Wtype){
+                self.typeIndex = i
+            }
+        }
+        for(let i=0;i<self.difficultyPicker.length;i++){
+            if(self.difficultyPicker[i] == self.wrongproblem.Wdifficulty){
+                self.difficultyIndex = i
+            }
+        }
+    }
+
     onLoad(options) {
         let self = this
 
-        self.Sid = options.sid
+        self.Wid = options.wid
+
+        wepy.request({
+                url:wepy.$instance.globalData.serverUrl + '/app/wrong_problem/get_wrong_problem',
+                method:'GET',
+                header: wepy.$instance.setHeader(),
+                data:{
+                    Wid:self.Wid,
+                },
+                success: function(res) {
+                    console.log(res)
+                    if (res.data.Code == 1){
+                        self.wrongproblem = res.data.Data
+                        if(self.wrongproblem.Wtype!="听写"){
+                            if(res.data.Data.WproblemPath!=""){
+                                let tmpList = res.data.Data.WproblemPath.split(";")
+                                self.imgList.name = tmpList.map(x => self.imageUrl + x)
+                            }
+                        } else{
+                            self.audioUploadPath = self.audioUrl + self.wrongproblem.WproblemPath
+                            self.audioName = self.wrongproblem.WproblemPath.length>15?'未知音频.mp3':self.wrongproblem.WproblemPath
+                        }
+                        
+                        if(res.data.Data.WanswerPath!=""){
+                            let tmpList = res.data.Data.WanswerPath.split(";")
+                            self.imgList.answer = tmpList.map(x => self.imageUrl + x)
+                        }
+                        if(res.data.Data.WmyAnswerPath!=""){
+                            let tmpList = res.data.Data.WmyAnswerPath.split(";")
+                            self.imgList.myAnswer = tmpList.map(x => self.imageUrl + x)
+                        }
+                        self.findIndex()
+                        self.$apply()
+                    }
+                }
+            })
+
     }
 }
 </script>

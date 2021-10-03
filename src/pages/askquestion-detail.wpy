@@ -78,6 +78,15 @@
             </view>
         </view>
     </view>
+
+    
+    <view wx:if="{{askquestion.AQisSolved==0}}" class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="padding flex-sub flex justify-center">
+                <button class="cu-btn bg-green round shadow lg" @tap="onClickSolved">已解决</button>
+            </view>
+        </view>
+    </view>
 </template>
 
 <script>
@@ -112,6 +121,49 @@ export default class Teacher extends wepy.page{
                 urls: self.imageListOfAnswer,
                 current: self.imageUrl + e.currentTarget.dataset.url
             });
+        },
+
+        
+        onClickSolved(){
+            let self = this
+            wx.showModal({
+                title: '已解决',
+                content: '确定已经解决此问题？',
+                cancelText: '取消',
+                confirmText: '确定',
+                success: res => {
+                    if (res.confirm) {
+                        wepy.request({
+                            url:wepy.$instance.globalData.serverUrl + '/app/teacher/update_ask_question',
+                            method:'POST',
+                            data:{
+                                AQid:Number(self.AQid),
+                                AQisSolved: 1,
+                            },
+                            header: wepy.$instance.setHeader(),
+                            success: function(res) {
+                                console.log(res)
+                                if (res.data.Code == 1){
+                                    console.log("Update Success!")
+                                    wepy.showToast({
+                                        title: '已解决', //提示的内容,
+                                        icon: 'success', //图标,
+                                        duration: 2000, //延迟时间,
+                                        mask: true, //显示透明蒙层，防止触摸穿透,
+                                        success: function(){
+                                            setTimeout(function(){
+                                                wepy.navigateBack({
+                                                    delta: 1
+                                                })
+                                            }, 1000)
+                                        },
+                                    });
+                                }
+                            }
+                        })
+                    }
+                }
+            })
         },
     }
 

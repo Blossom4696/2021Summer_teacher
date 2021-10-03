@@ -1,7 +1,7 @@
 {
     "description": "A WePY project for student sorting wrong problems on teacher",
     "setting": {
-        "urlCheck": false,
+        "urlCheck": true,
         "es6": false,
         "enhance": false,
         "postcss": false,
@@ -36,7 +36,7 @@
         "showES6CompileOption": false
     },
     "compileType": "miniprogram",
-    "appid": "wx71b416886963ba75",
+    "appid": "wxb8c2fb220104b873",
     "projectname": "2021summer_teacher",
     "miniprogramRoot": "dist/",
     "condition": {}

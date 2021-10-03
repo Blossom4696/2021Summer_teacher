@@ -35,6 +35,9 @@
             </view>
         </view>
     </view>
+    <view class="text-bold sm bg-white flex justify-center">
+        (点击学生查看更多)
+    </view>
 </template>
 
 <script>

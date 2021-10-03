@@ -5,6 +5,14 @@ page{
 </style>
 
 <template>
+    <view class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="flex-sub flex justify-start">
+                <button class="cu-btn bg-olive round shadow" @tap="onClickEditExercise">编辑习题</button>
+            </view>
+        </view>
+    </view>
+
     <view class="solid-bottom padding">
         <view class="text-black text-xl text-bold text-cut">
             {{exercise.Etitle}}
@@ -34,7 +42,7 @@ page{
                 </view>
             </view>
             
-            <audio src="{{exercise.EnamePath?(audioUrl + exercise.EnamePath):''}}" wx:else controls="true" name="" author=""></audio>
+            <audio src="{{exercise.EnamePath?(audioUrl + exercise.EnamePath):''}}" wx:if="{{exercise.Etype=='听写' && exercise.EnamePath!=''}}" controls="true" name="" author=""></audio>
 
             
         </view>
@@ -57,7 +65,13 @@ page{
         </view>
     </view>
     
-   
+    <view class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="padding flex-sub flex justify-center">
+                <button class="cu-btn bg-red round shadow lg" @tap="onClickDeleteExercise">删除习题</button>
+            </view>
+        </view>
+    </view>
     
 
 </template>
@@ -99,13 +113,54 @@ export default class Index extends wepy.page {
                 current: self.imageUrl + e.currentTarget.dataset.url
             });
         },
+
+        onClickEditExercise(e){
+            let self = this
+            wx.navigateTo({
+                url:"edit-exercise?eid="+self.exercise.Eid,
+            })
+        },
+
+        onClickDeleteExercise(e) {
+            let self = this
+            wx.showModal({
+                title: '删除习题',
+                content: '确定要删除此习题？',
+                cancelText: '取消',
+                confirmText: '确定',
+                success: res => {
+                    if (res.confirm) {
+                        wepy.request({
+                            url:wepy.$instance.globalData.serverUrl + '/app/exercise/delete_exercise/:id' + '?Eid=' + self.exercise.Eid.toString(),
+                            method:'DELETE',
+                            header: wepy.$instance.setHeader(),
+                            success: function(res) {
+                                console.log(res)
+                                if (res.data.Code == 1){
+                                    wepy.showToast({
+                                        title: '删除成功', //提示的内容,
+                                        icon: 'success', //图标,
+                                        duration: 2000, //延迟时间,
+                                        mask: true, //显示透明蒙层，防止触摸穿透,
+                                        success: function(){
+                                            setTimeout(function(){
+                                                wepy.navigateBack({
+                                                    delta: 1
+                                                })
+                                            }, 1000)
+                                        },
+                                    });
+                                }
+                            }
+                        })
+                    }
+                }
+            })
+        }
     }
 
-    onLoad(options) {
+    getExerciseData(){
         let self = this
-
-        self.Eid = options.eid
-
         wepy.request({
                 url:wepy.$instance.globalData.serverUrl + '/app/exercise/get_exercise',
                 method:'GET',
@@ -129,6 +184,17 @@ export default class Index extends wepy.page {
                     }
                 }
             })
+    }
+
+    onLoad(options) {
+        let self = this
+
+        self.Eid = options.eid
+    }
+
+    onShow(){
+        let self = this
+        self.getExerciseData()
     }
 }
 </script>

@@ -145,10 +145,10 @@ page {
 
 <template>
 <scroll-view scroll-y class="DrawerPage {{modalName=='viewModal'?'show':''}}">
-    <view class="flex bg-white">
-        <view class="padding flex-sub text-left" @tap="onClickCreateExercise">
-            添加
-        </view>
+    <view class="flex bg-white align-center padding">
+        <button class="cu-btn bg-blue round shadow flex-sub" @tap="onClickCreateExercise">
+            添加习题
+        </button>
         <view class="padding flex-sub text-center text-black text-lg text-bold">
             习题列表
         </view>
@@ -164,7 +164,7 @@ page {
         </view>
     </view>
 
-    <view class="flex align-center">
+    <view class="flex align-center bg-white">
         <view class="flex-sub padding text-left">
             <button class="cu-btn bg-{{isClickPrint?'grey':'green'}} shadow-blur round" @tap="clickPrint()">{{isClickPrint?'取消':'打印习题'}}</button>
         </view>
@@ -177,13 +177,17 @@ page {
         </view>
     </view>
 
-    <view class="justify-between flex bg-white">
+    <view class="justify-between flex bg-white align-center padding-lr-xs">
         <scroll-view class="bg-white nav" scroll-x scroll-with-animation style="width:90vw">
             <view class="cu-item {{index==screenCur.subjectCur?'text-orange cur':''}}" wx:for="{{exerciseField.Esubject}}" wx:key wx:for-item="item" @tap="tabSelectIndex" data-id="{{index}}" data-name="subject">
                 {{item}}
             </view>
         </scroll-view>
-        <image class="bg-white margin" style="width:40rpx;height:40rpx" src="{{imageScreen}}" @tap="showModal" data-target="viewModal"/>
+        <view class="bg-white margin-tb solid-left flex align-center" @tap="showModal" data-target="viewModal">
+            <view class="margin-lr-xs text-sm">筛选</view>
+            <image class="" style="width:40rpx;height:40rpx" src="{{imageScreen}}"/>
+        </view>
+        
     </view>
     
 
@@ -244,7 +248,7 @@ page {
 
 <scroll-view scroll-y class="DrawerWindow {{modalName=='viewModal'?'show':''}}">
     <view class="flex padding">
-        <view class="flex-sub padding">重置</view>
+        <view class="flex-sub padding" @tap="onClickReset">重置</view>
         <view class="flex-sub padding text-center" style="font-weight:bold">筛选习题</view>
         <view class="flex-sub padding text-right" style="color:blue" @tap="hideModal">完成</view>
     </view>
@@ -391,6 +395,17 @@ page {
             self.isPrintAnswer = self.isPrintAnswer?false:true
         },
 
+        onClickReset(){
+            let self = this
+            self.screenCur={
+                subjectCur: 0,
+                difficultyCur: 0,
+                typeCur:0,
+                gradeCur: 0,
+                unitCur: 0,
+            }
+        },
+
         onClickExercise(e) {
             let self = this
             self.exerciseIndex = e.currentTarget.dataset.id
@@ -466,6 +481,9 @@ page {
                         }
                         self.$apply()
                     }
+                },
+                fail: function(res){
+                    self.exerciseList = []
                 }
             })
         },
@@ -481,6 +499,9 @@ page {
                         self.exerciseField = res.data.Data
                         self.$apply()
                     }
+                },
+                fail: function(res){
+                    self.exerciseField = []
                 }
             })
         },

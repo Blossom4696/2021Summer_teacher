@@ -1,18 +1,41 @@
 <!-- login.wpy -->
 
 <style>
-
+page{
+    background-color: white;
+}
 </style>
 
 <template>
-    <view>
-        <view>账号</view>
-        <input class="input" data-name="username" @input="inputChange" value="{{ username }}" type="text" placeholder="请输入您的账号" />
-        <view>密码</view>
-        <input class="input" data-name="password" @input="inputChange" value="{{password}}" password = "true" type="safe-passward" placeholder="请输入您的密码" />
-        
+    <view class="flex bg-white padding-top justify-center">
+        <image style="width:160rpx;height:160rpx" class="margin margin-lr" src="{{icon}}" background-size="cover"/>
     </view>
-    <button type="primary" @tap="clickSubmit()">登录</button>
+
+    <view class="flex bg-white padding-bottom justify-center">
+        <view class="text-black text-bold text-xl">凯歌学习辅助系统教师端</view>
+    </view>
+    
+
+
+    <form @submit="formSubmit" class="margin-top">
+        <view class="cu-form-group">
+            <view class="title">账号</view>
+            <input placeholder="请输入您的账号" name="username" ></input>
+        </view>
+        <view class="cu-form-group">
+            <view class="title">密码</view>
+            <input placeholder="请输入您的密码" name="password" type="safe-passward" password = "true"></input>
+        </view>
+    
+
+        <view class="padding">
+            <view class="flex p-xs mb-sm">
+                <view class="padding flex-sub flex justify-center">
+                    <button class="cu-btn bg-olive round shadow lg" form-type="submit">立即登录</button>
+                </view>
+            </view>
+        </view>
+    </form>
     
 </template>
 
@@ -27,28 +50,23 @@ export default class Login extends wepy.page{
     }
 
     data={
-        userinfo:{
-            username: "",
-            password: "",
-        },
-        
-        
+        icon:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=miniprogram_icon.png',
     }
 
     methods = {
 
-        clickSubmit(){
+        formSubmit(e){
             let self = this;
             
             wepy.request({
                 url:wepy.$instance.globalData.serverUrl + '/app/login/teacher_login',
                 method:'GET',
                 data:{
-                    username:self.userinfo.username,
-                    password:self.userinfo.password
+                    username:e.detail.value.username,
+                    password:e.detail.value.password,
                 },
                 success: function(res) {
-                    console.log(res.data.Data["userinfo"])
+                    console.log(res)
                     if(res.data.Code == 1) {
                         
                         if(res.data.Msg == "Teacher login success!"){
@@ -59,6 +77,22 @@ export default class Login extends wepy.page{
                             console.log("login success")
                             self.$apply()
                             wepy.navigateBack({url:"index"})
+                        }
+                    }else if(res.data.Code == 2){
+                        if(res.data.Msg == "Password not correct!"){
+                            wx.showToast({
+                              title: '密码错误', //提示的内容,
+                              icon: 'error', //图标,
+                              mask: true, //显示透明蒙层，防止触摸穿透,
+                              success: res => {}
+                            });
+                        } else if(res.data.Msg == "Name not exist!"){
+                            wx.showToast({
+                              title: '用户名不存在', //提示的内容,
+                              icon: 'error', //图标,
+                              mask: true, //显示透明蒙层，防止触摸穿透,
+                              success: res => {}
+                            });
                         }
                     }
                 }

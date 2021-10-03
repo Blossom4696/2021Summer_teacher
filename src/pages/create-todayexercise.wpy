@@ -146,12 +146,15 @@ page {
 <template>
 <scroll-view scroll-y class="DrawerPage {{modalName=='viewModal'?'show':''}}">
     <!-- 习题列表那一行 -->
-    <view class="flex bg-white">
-        <view class="padding flex-sub text-left">
+    <view class="flex bg-white align-center padding">
+        <view wx:if="{{!isSelectAll}}" class="padding flex-sub text-left" @tap="onClickSelectAll">
             全选
         </view>
+        <view wx:else class="padding flex-sub text-left" @tap="onClickNonSelectAll">
+            取消全选
+        </view>
         <view class="padding flex-sub text-center text-black text-lg text-bold">
-            习题列表
+            布置习题
         </view>
         <view class="padding flex-sub text-right text-orange" @tap="onClickSubmit">
             布置
@@ -162,22 +165,23 @@ page {
     <view class="cu-bar search bg-white">
         <view class="search-form round">
             <text class="cuIcon-search"></text>
-            <input type="text" placeholder="搜索题目" confirm-type="search"></input>
-        </view>
-        <view class="action">
-            <button class="cu-btn bg-green shadow-blur round">搜索</button>
+            <input wx:if="{{activeTab==0}}" type="text" placeholder="搜索题目" confirm-type="search" @input="inputChangeSearchExercise"></input>
+            <input wx:if="{{activeTab==1}}" type="text" placeholder="搜索学生" confirm-type="search" @input="inputChangeSearchStudent"></input>
         </view>
     </view>
 
 
     <!-- tabbar -->
-    <view class="justify-between flex bg-white">
+    <view class="justify-between flex bg-white align-center padding-lr-xs">
         <scroll-view class="bg-white nav" scroll-x scroll-with-animation style="width:90vw">
             <view class="cu-item {{index==activeTab?'text-orange cur':''}}" wx:for="{{tabbar}}" wx:key wx:for-item="item" @tap="tabSelectIndex" data-id="{{index}}">
                 {{item}}
             </view>
         </scroll-view>
-        <image class="bg-white margin" style="width:40rpx;height:40rpx" src="{{imageScreen}}" @tap="showModal" data-target="viewModal"/>
+        <view wx:if="{{activeTab==0}}" class="bg-white margin-tb solid-left flex align-center" @tap="showModal" data-target="viewModal">
+            <view class="margin-lr-xs text-sm">筛选</view>
+            <image class="" style="width:40rpx;height:40rpx" src="{{imageScreen}}"/>
+        </view>
     </view>
     
 
@@ -187,7 +191,7 @@ page {
             <view class="flex p-xs mb-sm align-center">
                 <!-- 左 -->
                 <view class="flex-sub padding-sm">
-                    <image style="width:30rpx;height:30rpx" src="{{selectIconOfExercise[index]}}"></image>
+                    <image style="width:30rpx;height:30rpx" src="{{selectIconOfExercise[exercise.Eid]}}"></image>
                 </view>
                 <!-- 中 -->
                 <view class="flex-treble padding-sm">
@@ -229,7 +233,7 @@ page {
         <view class="bg-white flex solid-bottom align-center padding-lr">
             <!-- 选中图标 -->
             <view class="flex-sub padding-sm">
-                <image style="width:30rpx;height:30rpx" src="{{selectIconOfStudent[index]}}"></image>
+                <image style="width:30rpx;height:30rpx" src="{{selectIconOfStudent[student.Sid]}}"></image>
             </view>
 
             <!-- 学生头像 -->
@@ -251,7 +255,7 @@ page {
 
 <scroll-view scroll-y class="DrawerWindow {{modalName=='viewModal'?'show':''}}">
     <view class="flex padding">
-        <view class="flex-sub padding">重置</view>
+        <view class="flex-sub padding" @tap="onClickReset">重置</view>
         <view class="flex-sub padding text-center" style="font-weight:bold">筛选习题</view>
         <view class="flex-sub padding text-right" style="color:blue" @tap="hideModal">完成</view>
     </view>
@@ -311,6 +315,7 @@ page {
         activeTab: 0,
         tabbar: ['习题','学生'],
         exerciseList:[],
+        copyExerciseList: [],
         exerciseField:{},
         exerciseScreen: {
             subjectCur: 0,
@@ -330,23 +335,25 @@ page {
         imageScreen:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/screen.png',
         modalName : "",
         studentList:[],
+        copyStudentList: [],
         imgUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
         noUserIcon : wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=none_userinfo.png',
         selectIcon:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/select.png',
         nonselectIcon:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=icon/nonselect.png',
-        selectIconOfExercise: [],
-        selectIconOfStudent: [],
+        selectIconOfExercise: {},
+        selectIconOfStudent: {},
+        isSelectAll: false,
     }
 
     methods = {
         tabSelectIndex(e){
             let self = this
             self.activeTab = e.currentTarget.dataset.id
-            if(self.tabbar[e.currentTarget.dataset.id] == '习题'){
-                self.methods.getExerciseSort(self)
-            }else{
-
-            }
+            // if(self.tabbar[e.currentTarget.dataset.id] == '习题'){
+            //     self.methods.getExerciseSort(self)
+            // }else{
+            //     self.getStudentData()
+            // }
             
         },
 
@@ -373,12 +380,54 @@ page {
 
         onClickExercise(e) {
             let self = this
-            self.selectIconOfExercise[e.currentTarget.dataset.id] = self.selectIconOfExercise[e.currentTarget.dataset.id] == self.selectIcon ? self.nonselectIcon : self.selectIcon
+            let index = e.currentTarget.dataset.id
+            self.selectIconOfExercise[self.exerciseList[index].Eid] = self.selectIconOfExercise[self.exerciseList[index].Eid] == self.selectIcon ? self.nonselectIcon : self.selectIcon
+            
         },
 
         onClickStudent(e) {
             let self = this
-            self.selectIconOfStudent[e.currentTarget.dataset.id] = self.selectIconOfStudent[e.currentTarget.dataset.id] == self.selectIcon ? self.nonselectIcon : self.selectIcon
+            let index = e.currentTarget.dataset.id
+            self.selectIconOfStudent[self.studentList[index].Sid] = self.selectIconOfStudent[self.studentList[index].Sid] == self.selectIcon ? self.nonselectIcon : self.selectIcon
+        },
+
+        onClickReset(){
+            let self = this
+            self.exerciseScreen={
+                subjectCur: 0,
+                difficultyCur: 0,
+                typeCur:0,
+                gradeCur: 0,
+                unitCur: 0,
+            }
+        },
+
+        onClickSelectAll(){
+            let self = this
+            if(self.activeTab == 0){
+                for(let i = 0; i<self.exerciseList.length; i++){
+                    self.selectIconOfExercise[self.exerciseList[i].Eid] = self.selectIcon
+                }
+            } else if(self.activeTab == 1){
+                for(let i = 0; i<self.studentList.length; i++){
+                    self.selectIconOfStudent[self.studentList[i].Sid] = self.selectIcon
+                }
+            }
+            self.isSelectAll = true
+        },
+
+        onClickNonSelectAll(){
+            let self = this
+            if(self.activeTab == 0){
+                for(let i = 0; i<self.exerciseList.length; i++){
+                    self.selectIconOfExercise[self.exerciseList[i].Eid] = self.nonselectIcon
+                }
+            } else if(self.activeTab == 1){
+                for(let i = 0; i<self.studentList.length; i++){
+                    self.selectIconOfStudent[self.studentList[i].Sid] = self.nonselectIcon
+                }
+            }
+            self.isSelectAll = false
         },
 
         onClickSubmit(){
@@ -387,16 +436,36 @@ page {
             
             let Eids = []
             let Sids = []
-            for(let i=0;i<self.selectIconOfExercise.length;i++){
-                if(self.selectIconOfExercise[i] == self.selectIcon){
-                    Eids.push(self.exerciseList[i].Eid)
+            for(var key in self.selectIconOfExercise){
+                if(self.selectIconOfExercise[key] == self.selectIcon){
+                    Eids.push(Number(key))
                 }
             }
-            for(let i=0;i<self.selectIconOfStudent.length;i++){
-                if(self.selectIconOfStudent[i] == self.selectIcon){
-                    Sids.push(self.studentList[i].Sid)
+            for(var key in self.selectIconOfStudent){
+                if(self.selectIconOfStudent[key] == self.selectIcon){
+                    Sids.push(Number(key))
                 }
             }
+            
+
+            if(Eids.length == 0){
+                wx.showToast({
+                    title: '请选择习题', //提示的内容,
+                    icon: 'error', //图标,
+                    mask: true, //显示透明蒙层，防止触摸穿透,
+                    success: res => {}
+                });
+                return
+            } else if(Sids.length == 0){
+                wx.showToast({
+                    title: '请选择学生', //提示的内容,
+                    icon: 'error', //图标,
+                    mask: true, //显示透明蒙层，防止触摸穿透,
+                    success: res => {}
+                });
+                return
+            }
+
             wepy.request({
                 url:wepy.$instance.globalData.serverUrl + '/app/teacher/insert_today_exercise',
                 data:{
@@ -427,8 +496,11 @@ page {
                     console.log(res)
                     if (res.data.Code == 1){
                         self.exerciseList = res.data.Data
+                        self.copyExerciseList = JSON.parse(JSON.stringify(self.exerciseList)) //深拷贝
+
+                        // 选中图标
                         for(let i=0;i<self.exerciseList.length;i++){
-                            self.selectIconOfExercise.push(self.nonselectIcon)
+                            self.selectIconOfExercise[self.exerciseList[i].Eid] = self.nonselectIcon
                         }
                         self.$apply()
                     }
@@ -473,7 +545,45 @@ page {
             })
         },
 
+        inputChangeSearchExercise(e){
+            let self = this
         
+            wepy.request({
+                    url:wepy.$instance.globalData.serverUrl + '/app/user/common/search_exercise',
+                    method:'GET',
+                    header: wepy.$instance.setHeader(),
+                    data:{
+                        word:e.detail.value,
+                    },
+                    success: function(res) {
+                        console.log(res)
+                        if (res.data.Code == 1){
+                            self.exerciseList = res.data.Data
+                            self.$apply()
+                        }
+                    }
+                })
+        },
+
+        inputChangeSearchStudent(e){
+            let self = this
+        
+            wepy.request({
+                    url:wepy.$instance.globalData.serverUrl + '/app/user/common/search_student_from_teacher',
+                    method:'GET',
+                    header: wepy.$instance.setHeader(),
+                    data:{
+                        word:e.detail.value,
+                    },
+                    success: function(res) {
+                        console.log(res)
+                        if (res.data.Code == 1){
+                            self.studentList = res.data.Data
+                            self.$apply()
+                        }
+                    }
+                })
+        }
 
     }
 
@@ -489,8 +599,11 @@ page {
                     console.log(res)
                     if (res.data.Code == 1){
                         self.studentList = res.data.Data
+                        self.copyStudentList = JSON.parse(JSON.stringify(self.studentList)) //深拷贝
+
+                        // 图标
                         for(let i=0;i<self.studentList.length;i++){
-                            self.selectIconOfStudent.push(self.nonselectIcon)
+                            self.selectIconOfStudent[self.studentList[i].Sid] = self.nonselectIcon
                         }
                         self.$apply()
                     }
