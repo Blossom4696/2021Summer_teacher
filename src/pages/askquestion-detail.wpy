@@ -18,7 +18,7 @@
             
         </view>
         
-        <view class="cu-item shadow radius">
+        <view wx:if="{{askquestion.Eid!=-1}}" class="cu-item shadow radius">
             <view class="solid-bottom padding">
                 <view class="text-black text-xl text-bold text-cut">
                     {{exercise.Etitle}}
@@ -69,6 +69,12 @@
                         <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" @tap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"></image>
                     </view>
                 </view>
+            </view>
+        </view>
+
+        <view wx:else class="padding">
+            <view class="text-black text-xl text-bold flex justify-center">
+                学生自主提问
             </view>
         </view>
 
@@ -186,7 +192,10 @@ export default class Teacher extends wepy.page{
                     self.$apply()
 
                     self.getStudentData()
-                    self.getExerciseData()
+                    if(self.askquestion.Eid!=-1){
+
+                        self.getExerciseData()
+                    }
                 }
             }
         })

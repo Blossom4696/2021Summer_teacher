@@ -46,7 +46,7 @@
 							<view class="text-center">{{askQuestion.Snickname}}</view>
 						</view>
 						<view class="flex-treble">
-							<view class="text-center">{{askQuestion.Etitle}}</view>
+							<view class="text-center">{{askQuestion.Eid==-1?'学生自主提问':askQuestion.Etitle}}</view>
 						</view>
 						<view class="flex-twice">
 							<view class="text-center">{{askQuestion.AQtime}}</view>

@@ -179,7 +179,7 @@ export default class Index extends wepy.page{
             name:[],
             answer:[],
         },
-        gradePicker:['七年级','八年级','九年级','高一','高二','高三'],
+        gradePicker:['七年级上','七年级下','八年级上','八年级下','九年级上','九年级下'],
         subjectPicker:['语文','数学','英语','物理'],
         typePicker:{
             '语文':['默写','听写'],
