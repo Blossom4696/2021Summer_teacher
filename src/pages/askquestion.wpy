@@ -18,19 +18,16 @@
    
     <view class="cu-item">
         <view class="cu-list menu card-menuradius shadow">
-            <view class="cu-item arrow align-center">
+            <view class="cu-item align-center">
                 <view class="content">
                     <view>学生提问</view>
                 </view>
                 <checkbox-group class="flex padding" bindchange="solvedCheckboxChange" > 
                     <view class="margin-right-lg align-center flex">
                         <checkbox value="cb" checked="{{isSolved}}" />
-                        <view>已解决</view>
+                        <view class="margin-left-xs">已解决</view>
                     </view>
                 </checkbox-group>
-                <view class="flex justify-end">
-                    更多
-                </view>
             </view>
         </view>
         <view class="cu-list menu card-menuradius shadow">

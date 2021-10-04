@@ -181,7 +181,7 @@ page {
     
     <view class="flex">
         <view class="flex-sub padding">
-            <button class="cu-btn bg-{{isClickPrint?'grey':'green'}} shadow-blur round" @tap="clickPrint()">{{isClickPrint?'取消':'打印习题'}}</button>
+            <button class="cu-btn bg-{{isClickPrint?'grey':'green'}} shadow-blur round" @tap="clickPrint()">{{isClickPrint?'取消':'打印错题'}}</button>
         </view>
         <view class="flex-sub padding flex justify-center"></view>
         <view class="flex-sub padding flex justify-end">
