@@ -1,0 +1,87 @@
+
+    <view class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="flex-sub flex justify-start">
+                <button class="cu-btn bg-olive round shadow" bindtap="onClickEditWrongProblem">编辑错题</button>
+            </view>
+        </view>
+    </view>
+
+    <view class="solid-bottom padding">
+        <view class="text-black text-xl text-bold text-cut">
+            {{Sname}}的错题
+        </view>
+        <view class="text-black text-xl text-bold text-cut">
+            {{wrongProblem.Wtitle}}
+        </view>
+        <view class="flex margin">
+            <view class="flex-start cu-tag radius bg-green text-lg light">
+                {{wrongProblem.Wgrade}}
+            </view>
+            <view class="flex-start cu-tag radius bg-brown text-lg light">
+                {{wrongProblem.Wsubject}}
+            </view>
+        </view>
+    </view>
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            题目描述: {{wrongProblem.Wdescription}}
+        </view>
+
+        <view class="margin text-lg"  wx:if="{{wrongProblem.WproblemTxt!=''}}">
+            {{wrongProblem.WproblemTxt}}
+        </view>
+
+        <view class="margin"  wx:if="{{wrongProblem.WproblemPath!=''}}">
+            <view wx:if="{{wrongProblem.Wtype!='听写'}}">
+                <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
+                    <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" bindtap="ViewImageOfName" data-url="{{imgOfName}}"/>
+                </view>
+            </view>
+            
+            <audio wx:if="{{wrongProblem.Wtype=='听写' && wrongProblem.WproblemPath!=''}}" src="{{wrongProblem.WproblemPath?(audioUrl + wrongProblem.WproblemPath):''}}" controls="true" name="" author=""/>
+
+            
+        </view>
+        
+        
+    </view>
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            正确答案
+        </view>
+
+        <view class="margin text-lg"  wx:if="{{wrongProblem.WanswerTxt!='null'}}">
+            {{wrongProblem.WanswerTxt}}
+        </view>
+
+        <view class="margin"  wx:if="{{wrongProblem.WanswerPath!='null'}}">
+            <view wx:for="{{imageListOfAnswer}}" wx:key="index" wx:for-item="imgOfAnswer">
+                <image src="{{imgOfAnswer!=imageUrl?imgOfAnswer:''}}" mode="widthFix" bindtap="ViewImageOfAnswer" data-url="{{imgOfAnswer}}"/>
+            </view>
+        </view>
+    </view>
+    
+    <view class="padding solid-bottom">
+        <view class="text-xl text-black text-bold">
+            我的答案
+        </view>
+
+        <view class="margin text-lg"  wx:if="{{wrongProblem.WmyAnswerTxt!='null'}}">
+            {{wrongProblem.WmyAnswerTxt}}
+        </view>
+
+        <view class="margin"  wx:if="{{wrongProblem.WmyAnswerPath!='null'}}">
+            <view wx:for="{{imageListOfMyAnswer}}" wx:key="index" wx:for-item="imgOfMyAnswer">
+                <image src="{{imgOfMyAnswer!=imageUrl?imgOfMyAnswer:''}}" mode="widthFix" bindtap="ViewImageOfMyAnswer" data-url="{{imgOfMyAnswer}}"/>
+            </view>
+        </view>
+    </view>
+    
+    <view class="padding">
+        <view class="flex p-xs mb-sm">
+            <view class="padding flex-sub flex justify-center">
+                <button class="cu-btn bg-red round shadow lg" bindtap="onClickDeleteWrongProblem">删除错题</button>
+            </view>
+        </view>
+    </view>

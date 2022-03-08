@@ -1,0 +1,147 @@
+
+<scroll-view scroll-y class="DrawerPage {{modalName=='viewModal'?'show':''}}">
+    <view class="flex bg-white align-center padding">
+        <button class="cu-btn bg-blue round shadow flex-sub" bindtap="onClickCreateExercise">
+            添加习题
+        </button>
+        <view class="padding flex-sub text-center text-black text-lg text-bold">
+            习题列表
+        </view>
+        <view class="padding flex-sub text-right">
+            
+        </view>
+    </view>
+
+    <view class="cu-bar search bg-white">
+        <view class="search-form round">
+            <text class="cuIcon-search"/>
+            <input type="text" placeholder="搜索题目" confirm-type="search" bindinput="inputChangeSearch"/>
+        </view>
+    </view>
+
+    <view class="flex align-center bg-white">
+        <view class="flex-sub padding text-left">
+            <button class="cu-btn bg-{{isClickPrint?'grey':'green'}} shadow-blur round" bindtap="clickPrint" data-wpyclickprint-a="">{{isClickPrint?'取消':'打印习题'}}</button>
+        </view>
+        <view class="flex-sub padding flex align-center flex justify-center">
+            <checkbox  wx:if="{{isClickPrint}}" bindtap="checkboxChange" checked="{{isPrintAnswer}}"/>
+            <view  wx:if="{{isClickPrint}}" class="margin-left-xs text-sm">打印答案</view>
+        </view>
+        <view class="flex-sub padding flex justify-end">
+            <button wx:if="{{isClickPrint}}" class="cu-btn bg-green shadow-blur round" bindtap="clickPrintSubmut" data-wpyclickprintsubmut-a="">完成</button>
+        </view>
+    </view>
+
+    <view class="justify-between flex bg-white align-center padding-lr-xs">
+        <scroll-view class="bg-white nav" scroll-x scroll-with-animation="scroll-with-animation" style="width:90vw">
+            <view class="cu-item {{index==screenCur.subjectCur?'text-orange cur':''}}" wx:for="{{exerciseField.Esubject}}" wx:key="wx:key" wx:for-item="item" bindtap="tabSelectIndex" data-id="{{index}}" data-name="subject">
+                {{item}}
+            </view>
+        </scroll-view>
+        <view class="bg-white margin-tb solid-left flex align-center" bindtap="showModal" data-target="viewModal">
+            <view class="margin-lr-xs text-sm">筛选</view>
+            <image class="" style="width:40rpx;height:40rpx" src="{{imageScreen}}"/>
+        </view>
+        
+    </view>
+    
+
+
+    <view wx:for="{{exerciseList}}" wx:key="index" wx:for-item="exercise" data-id="{{index}}">
+        <mp-slideview buttons="{{slideButtons}}" icon="{{true}}" bindbuttontap="slideButtonTap" data-index="{{index}}">
+            
+        <view class="padding-left padding-right bg-white solid-bottom">
+            <view class="flex p-xs mb-sm align-center">
+                <!-- 左半边 -->
+                <view wx:if="{{isClickPrint}}" class="flex-sub padding-sm" bindtap="onClickSelectIcon" data-id="{{index}}">
+                    <image style="width:30rpx;height:30rpx" src="{{selectIconOfExercise[index]}}"/>
+                </view>
+                <!-- 中间 -->
+                <view class="flex-treble padding-sm" bindtap="onClickExercise" data-id="{{index}}">
+                    <!-- 里面两行，上面行 -->
+                    <view class="exercise_upper">
+                        <!-- 题目难度标签 -->
+                        <view class="cu-tag radius bg-{{difficultyColor[exercise.Edifficulty]}} light margin-right-xs">
+                            {{exercise.Edifficulty}}
+                        </view>
+                        <!-- 题目title -->
+                        <view class="title margin-lr-xs">
+                            {{exercise.Etitle}}
+                        </view>
+                        
+                    </view>
+
+                    <!-- 下面行 -->
+                    <view class="flex">
+                        <view class="margin-right-xs">
+                            {{exercise.Esubject}}
+                        </view>
+                        <view class="margin-lr-xs">
+                            {{exercise.Etype}}
+                        </view>
+                    </view>
+                </view>
+                <!-- 右半边 -->
+                <view class="flex-twice padding-sm" bindtap="onClickExercise" data-id="{{index}}">
+                    <view class="text-center text-xs">
+                        {{exercise.Egrade}}
+                    </view>
+                </view>
+            </view>
+        </view>
+        </mp-slideview>
+    </view>
+</scroll-view>
+
+<mp-dialog title="删除习题" show="{{dialogShow}}" bindbuttontap="tapDeleteDialogButton" buttons="{{buttons}}" bindclose="dialogClose">
+      <view>确定要删除此习题吗？</view>
+</mp-dialog>
+
+<view class="DrawerClose {{modalName=='viewModal'?'show':''}}" bindtap="hideModal">
+    <text class="cuIcon-pullright"/>
+</view>
+
+<scroll-view scroll-y class="DrawerWindow {{modalName=='viewModal'?'show':''}}">
+    <view class="flex padding">
+        <view class="flex-sub padding" bindtap="onClickReset">重置</view>
+        <view class="flex-sub padding text-center" style="font-weight:bold">筛选习题</view>
+        <view class="flex-sub padding text-right" style="color:blue" bindtap="hideModal">完成</view>
+    </view>
+    <view>
+        <view class="margin" style="font-weight:bold">年级</view>
+        <view class="grid col-{{exerciseField.Egrade.length>3?3:exerciseField.Egrade.length}} margin text-center">
+            <view  wx:for="{{exerciseField.Egrade}}" wx:key="wx:key">
+                <button class="round cu-btn lines-{{screenCur.gradeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" bindtap="tabSelect" data-name="grade" data-id="{{index}}">{{exerciseField.Egrade[index]}}</button>
+            </view>
+        </view>
+    </view>
+    <view>
+        <view class="margin" style="font-weight:bold">习题难度</view>
+        <view class="grid col-{{exerciseField.Edifficulty.length>4?4:exerciseField.Edifficulty.length}} margin text-center">
+            <view  wx:for="{{exerciseField.Edifficulty}}" wx:key="wx:key">
+                <button class="round cu-btn lines-{{screenCur.difficultyCur==index?'blue':'gray'}} shadow padding margin-tb-sm" bindtap="tabSelect" data-name="difficulty" data-id="{{index}}">{{exerciseField.Edifficulty[index]}}</button>
+            </view>
+        </view>
+    </view>
+    <view>
+        <view class="margin" style="font-weight:bold">习题类型</view>
+        <view class="margin">学科</view>
+        <view class="grid col-{{exerciseField.Esubject.length>4?4:exerciseField.Esubject.length}} margin text-center">
+            <view wx:for="{{exerciseField.Esubject}}" wx:key="wx:key">
+                <button class="round cu-btn lines-{{screenCur.subjectCur==index?'blue':'gray'}} shadow padding margin-tb-sm" bindtap="tabSelect" data-name="subject" data-id="{{index}}">{{exerciseField.Esubject[index]}}</button>
+            </view>
+        </view>
+        <view class="margin">题型</view>
+        <view class="grid margin text-center col-{{exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]].length>3?3:exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]].length}}">
+            <view wx:for="{{exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]]}}" wx:key="wx:key" wx-for-item="item">
+                <button class="round cu-btn lines-{{screenCur.typeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" bindtap="tabSelect" data-name="type" data-id="{{index}}">{{item}}</button>
+            </view>
+        </view>
+        <view class="margin">单元</view>
+        <view class="grid margin text-center col-{{exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]].length>3?3:exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]].length}}">
+            <view wx:for="{{exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]]}}" wx:key="wx:key" wx-for-item="item">
+                <button class="round cu-btn lines-{{screenCur.unitCur==index?'blue':'gray'}} shadow padding margin-tb-sm" bindtap="tabSelect" data-name="unit" data-id="{{index}}">{{item}}</button>
+            </view>
+        </view>
+    </view>
+</scroll-view>

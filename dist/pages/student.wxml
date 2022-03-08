@@ -1,0 +1,36 @@
+
+    <view class="flex bg-white padding justify-center text-center text-black text-lg text-bold">
+        学生列表
+    </view>
+    <view class="cu-bar search bg-white">
+        <view class="search-form round">
+            <text class="cuIcon-search"/>
+            <input type="text" placeholder="搜索名字" confirm-type="search" bindinput="inputChangeSearch"/>
+        </view>
+    </view>
+
+    <view class="flex bg-white">
+        <view style="margin-left:140rpx"/>
+        <view class="cu-item flex-sub {{index==fieldCur?'text-orange':''}} align-center flex justify-center"  wx:for="{{studentField}}" wx:key="wx:key" wx:for-item="item" bindtap="tabSelectIndex" data-id="{{index}}" data-name="subject">
+            <view>{{item}}</view>
+            
+            <image style="width:30rpx;height:30rpx" src="{{sortImg[index]}}"/>
+        </view>
+            
+    </view>
+
+    <view  wx:for="{{studentList}}" wx:key="index" wx:for-item="student" data-id="{{index}}" bindtap="onClickStudent">
+        <view class="bg-white flex solid-bottom align-center">
+            <image class="cu-avatar round margin" src="{{imgUrl + student.Sicon}}">
+            </image>
+
+            <view class="flex-sub text-center">{{student.Snickname}}</view>
+            <view class="flex-sub text-center">{{student.SgradeName}}</view>
+            <view class="flex-sub text-center">
+                {{student.Cname}}
+            </view>
+        </view>
+    </view>
+    <view class="text-bold sm bg-white flex justify-center">
+        (点击学生查看更多)
+    </view>

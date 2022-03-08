@@ -1,0 +1,4 @@
+
+.DeleteButton{
+    color: red;
+}

@@ -1,0 +1,48 @@
+
+<view class="cu-card">
+    <view class="cu-item">
+        <radio-group class="flex padding" bindchange="dateRadioChange"> 
+            <view class="flex-sub flex align-center"  wx:for="{{dateList}}" wx:key="{{item.value}}">
+                <view class="margin-xs">
+                    <radio value="{{item.value}}" checked="{{item.checked}}"/>
+                </view>
+                <view class="">{{item.name}}</view>
+            </view>
+        </radio-group>
+    </view>
+
+   
+    <view class="cu-item">
+        <view class="cu-list menu card-menuradius shadow">
+            <view class="cu-item align-center">
+                <view class="content">
+                    <view>学生提问</view>
+                </view>
+                <checkbox-group class="flex padding" bindchange="solvedCheckboxChange"> 
+                    <view class="margin-right-lg align-center flex">
+                        <checkbox value="cb" checked="{{isSolved}}"/>
+                        <view class="margin-left-xs">已解决</view>
+                    </view>
+                </checkbox-group>
+            </view>
+        </view>
+        <view class="cu-list menu card-menuradius shadow">
+            <view class="cu-item flex align-center"  wx:for="{{askQuestionList}}" wx:key="index" wx:for-item="askQuestion" data-id="{{index}}" bindtap="onClickAskQuestion">
+                <view class="flex-sub">
+                    <view class="text-center">{{askQuestion.Snickname}}</view>
+                </view>
+                <view class="flex-treble">
+                    <view class="text-center">{{askQuestion.Eid==-1?'学生自主提问':askQuestion.Etitle}}</view>
+                </view>
+                <view class="flex-twice">
+                    <view class="text-center">{{askQuestion.AQtime}}</view>
+                </view>
+                <view class="flex-sub">
+                    <view class="text-center text-{{askQuestion.AQisSolved==1?'black':'red'}}">{{askQuestion.AQisSolved==1?'已解决':'未解决'}}</view>
+                </view>
+                
+            </view>
+        </view>
+    </view>
+
+</view>

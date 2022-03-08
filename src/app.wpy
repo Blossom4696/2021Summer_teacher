@@ -79,7 +79,7 @@ export default class extends wepy.app {
 
   globalData = {
     userInfo: null,
-    serverUrl: "https://www.bigby.love:8080",
+    serverUrl: "https://www.kaigestudy.top:8080",
   }
 
   onLaunch() {

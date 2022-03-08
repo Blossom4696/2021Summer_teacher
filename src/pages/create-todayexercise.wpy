@@ -433,7 +433,7 @@ page {
         onClickSubmit(){
             let self = this
             let today = new Date()
-            
+            console.log(today.toLocaleDateString())
             let Eids = []
             let Sids = []
             for(var key in self.selectIconOfExercise){

@@ -1,0 +1,12 @@
+page {
+  background-color: white;
+}
+.titlePassBtn {
+  margin-top: 20rpx;
+}
+.input {
+  width: 70%;
+}
+.submitBtn {
+  width: 150rpx;
+}
