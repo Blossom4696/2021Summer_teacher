@@ -11,7 +11,7 @@
             编辑习题
         </view>
         <view class="padding flex-sub text-right">
-            
+
         </view>
     </view>
 
@@ -88,10 +88,10 @@
 			{{audioUploadPath==''?'0':'1'}}/1
 		</view>
         <button class="cu-btn bg-{{audioUploadPath!=''?'green':'grey'}} shadow" @tap="onClickPlayRecord">播放录音</button>
-        
+
     </view>
     <view wx:if="{{typePicker[subjectPicker[subjectIndex]][typeIndex]=='听写'}}" class="cu-bar bg-white" style="border-top:1rpx solid #eee;">
-        <radio-group class="flex padding" bindchange="audioSelectRadioChange" > 
+        <radio-group class="flex padding" bindchange="audioSelectRadioChange" >
             <view class="flex-sub flex align-center" wx:for="{{audioSelectList}}" wx:key="{{item.value}}">
                 <view class="margin-xs">
                     <radio value="{{item.value}}" checked="{{item.checked}}" />
@@ -112,7 +112,7 @@
         <button class="cu-btn bg-green shadow" @touchstart="startRecord" @touchend="endRecord">
             点击录音
         </button>
-        
+
         <view wx:if="{{audioUploadPath!=''}}" class="action">{{duration}}</view>
         <view wx:else class="action">0'000s</view>
     </view>
@@ -167,6 +167,8 @@
 </template>
 
 <script>
+import { difficultRange, gradeRange, subjectRange, typeRange } from '../common/constant';
+
 const recoderManager = wx.getRecorderManager()
 const innerAudioContext = wx.createInnerAudioContext()
 import wepy from 'wepy'
@@ -179,20 +181,10 @@ export default class Index extends wepy.page{
             name:[],
             answer:[],
         },
-        gradePicker:['七年级上','七年级下','八年级上','八年级下','九年级上','九年级下'],
-        subjectPicker:['语文','数学','英语','物理'],
-        typePicker:{
-            '语文':['默写','听写'],
-            '数学':['选择题','填空题','解答题'],
-            '英语':['默写','听写'],
-            '物理':['选择题','填空题','解答题'],
-        },
-        difficultyPicker: [
-            '简单',
-            '中等',
-            '困难',
-            '竞赛',
-        ],
+        gradePicker: gradeRange,
+        subjectPicker:subjectRange,
+        typePicker: typeRange,
+        difficultyPicker: difficultRange,
         gradeIndex:null,
         subjectIndex:null,
         typeIndex:null,
@@ -232,7 +224,7 @@ export default class Index extends wepy.page{
                 self.typeIndex = null
             }
             self.subjectIndex = e.detail.value
-            
+
         },
 
         pickerTypeChange(e){
@@ -343,7 +335,7 @@ export default class Index extends wepy.page{
                         self.audioName = res.tempFiles[0].name
                         self.$apply()
                     }
-                    
+
                 }
             })
         },
@@ -355,7 +347,7 @@ export default class Index extends wepy.page{
             let successUp = 0; //成功
             let failUp = 0; //失败
             let count = 0; //第几张
-            
+
             if(self.imgList.name.length>0 && self.typePicker[self.subjectPicker[self.subjectIndex]][self.typeIndex]!='听写'){// 图片上传
                 let length = self.imgList.name.length; //总数
                 self.recursionImgUpload(self,self.imgList.name, successUp, failUp, count, length)
@@ -382,7 +374,7 @@ export default class Index extends wepy.page{
             } else if(self.audioUploadPath!='' && self.typePicker[self.subjectPicker[self.subjectIndex]][self.typeIndex]=='听写'){// 音频上传
                 self.audioUpload(self, failUp)
                 let lastindexOfAudio = self.audioUploadPath.lastIndexOf("/")
-                
+
                 sendFormData["EnamePath"] = "exercise/" + self.audioUploadPath.substring(lastindexOfAudio + 1, self.audioUploadPath.length)
             }
 
@@ -429,7 +421,7 @@ export default class Index extends wepy.page{
                                             delta: 1
                                         })
                                     }, 1000)
-                                        
+
                                 },
                             });
                         }
@@ -438,7 +430,7 @@ export default class Index extends wepy.page{
             }
         },
 
-        
+
     }
 
     // 递归方式上传多张图片
@@ -464,7 +456,7 @@ export default class Index extends wepy.page{
                 failUp++;//失败+1
             },
             complete(e){
-                
+
                 count++;
                 if(count == length) {
                     console.log("上传成功")
@@ -473,7 +465,7 @@ export default class Index extends wepy.page{
                 }
             }
         });
-        
+
     }
 
     // 上传音频
@@ -499,7 +491,7 @@ export default class Index extends wepy.page{
         });
     }
 
-    
+
     findIndex(){
         let self = this
         for(let i=0;i<self.gradePicker.length;i++){
@@ -554,8 +546,8 @@ export default class Index extends wepy.page{
                             let tmpList = res.data.Data.EanswerPath.split(";")
                             self.imgList.answer = tmpList.map(x => self.imageUrl + x)
                         }
-                        
-                        
+
+
                         self.findIndex()
                         self.$apply()
                     }

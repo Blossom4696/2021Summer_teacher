@@ -166,6 +166,9 @@
 </template>
 
 <script>
+
+import { difficultRange, gradeRange, subjectRange, typeRange } from '../common/constant';
+
 const recoderManager = wx.getRecorderManager()
 const innerAudioContext = wx.createInnerAudioContext()
 import wepy from 'wepy'
@@ -175,20 +178,10 @@ export default class Index extends wepy.page{
             name:[],
             answer:[],
         },
-        gradePicker:['七年级上','七年级下','八年级上','八年级下','九年级上','九年级下'],
-        subjectPicker:['语文','数学','英语','物理'],
-        typePicker:{
-            '语文':['默写','听写'],
-            '数学':['选择题','填空题','解答题'],
-            '英语':['默写','听写'],
-            '物理':['选择题','填空题','解答题'],
-        },
-        difficultyPicker: [
-            '简单',
-            '中等',
-            '困难',
-            '竞赛',
-        ],
+        gradePicker: gradeRange,
+        subjectPicker:subjectRange,
+        typePicker: typeRange,
+        difficultyPicker: difficultRange,
         gradeIndex:null,
         subjectIndex:null,
         typeIndex:null,
