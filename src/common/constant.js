@@ -15,3 +15,11 @@ export const typeRange = {
 };
 
 export const difficultRange = ['简单', '中等', '困难', '竞赛'];
+
+export const autoCorrectRange = [{
+  value: 1,
+  label: "自动"
+},{
+  value: 2,
+  label: "手动"
+}];
