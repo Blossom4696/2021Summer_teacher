@@ -9,20 +9,25 @@
                 <image class="cu-avatar round margin lg" src="{{ student.Sicon?imgUrl + student.Sicon:'' }}" background-size="cover"></image>
                 <view class="margin">
                     <view class="text-black text-xl text-bold">{{ student.Snickname }}</view>
-                </view>        
+                </view>
             </view>
-            
+
             <view class="flex padding">
                 <view class="flex-sub margin-tb text-black text-lg">年级：{{ student.SgradeName }}</view>
                 <view class="flex-sub margin-tb text-black text-lg">校区：{{ student.Cname }}</view>
             </view>
         </view>
-        
+
         <view class="cu-item margin-top-xl margin-bottom-xl">
             <view class="cu-list menu card-menuradius shadow">
                 <view class="cu-item arrow">
                     <view class="content" data-url="todaygrade" @tap="onClick">
                         <view>今日习题成绩</view>
+                    </view>
+                </view>
+                <view class="cu-item arrow">
+                    <view class="content" data-url="exercise-history" @tap="onClick">
+                        <view>习题历史查看</view>
                     </view>
                 </view>
                 <view class="cu-item arrow">
@@ -37,7 +42,7 @@
                 </view>
             </view>
         </view>
-        
+
     </view>
 </template>
 

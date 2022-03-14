@@ -1,0 +1,97 @@
+<template>
+	<block wx:if="{{type === 'add' || imageList.length > 0}}">
+		<view class='cu-bar bg-white margin-top' wx:if="{{type === 'add'}}">
+			<view class='action'>
+				图片上传
+			</view>
+			<view class='action'>
+				{{ imageList.length }}/{{ maxSize }}
+			</view>
+		</view>
+		<view class='{{listWrapperClass}}'>
+			<view bindtap='ViewImage' class='bg-img' wx:for='{{imageList}}'
+				  wx:key='{{index}}'>
+				<image mode='{{mode}}' src='{{imageList[index]}}'></image>
+				<view catchtap='DelImg' class='cu-tag bg-red' data-index='{{index}}' wx:if="{{imageList.length < maxSize && type === 'add'}}">
+					<text class='cuIcon-close'></text>
+				</view>
+			</view>
+			<view bindtap='ChooseImage' class='solids' wx:if="{{imageList.length < maxSize && type === 'add'}}">
+				<text class='cuIcon-cameraadd'></text>
+			</view>
+		</view>
+	</block>
+</template>
+<script>
+import wepy from 'wepy';
+export default class ImageList extends wepy.component {
+
+	data = {
+		listWrapperClass: "grid col-4 grid-square flex-sub",
+		mode: "aspectFill",
+	}
+
+	props = {
+		maxSize: {
+			type: Number,
+			default: 9
+		},
+		imageList: {
+			type: Array,
+			default: []
+		},
+		type:{
+			type:String,
+			default: "add"
+		},
+	};
+
+	computed = {
+		listWrapperClass(){
+			if(this.type === "add"){
+				return "grid col-4 grid-square flex-sub";
+			}else{
+				return "grid col-1";
+			}
+		},
+		mode(){
+			return this.type === 'add' ? 'aspectFill' : 'widthFix';
+		}
+	}
+
+	methods = {
+		ChooseImage() {
+			wx.chooseImage({
+				count: this.maxSize, //默认9
+				sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
+				sourceType: ['album'], //从相册选择
+				success: (res) => {
+					let tempList;
+					if (Array.isArray(this.imageList) && this.imageList.length !== 0) {
+						tempList = this.imageList.concat(res.tempFilePaths);
+					} else {
+						tempList = res.tempFilePaths;
+					}
+					this.$emit('imageListChange', tempList);
+				}
+			});
+		},
+		ViewImage(e) {
+			wx.previewImage({
+				urls: this.imageList,
+				current: e.currentTarget.dataset.url
+			});
+		},
+		DelImg(e) {
+			this.imageList.splice(Number(e.currentTarget.dataset.index), 1);
+			this.$emit('imageListChange', this.imageList);
+		}
+	};
+	GetImageList = () => {
+		return this.imageList;
+	};
+
+	onLoad() {
+	}
+}
+</script>

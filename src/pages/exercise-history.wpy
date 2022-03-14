@@ -1,0 +1,163 @@
+<!-- exercise.wpy -->
+<style lang='css'>
+  .daily-exercise-item{
+    height: 70rpx;
+    font-size: 35rpx;
+  }
+</style>
+<template>
+  <view class='flex' style='height:100vh; flex-direction: column'>
+    <!-- 习题列表那一行 -->
+    <view class="flex bg-white align-center padding">
+      <view class="flex-sub text-center text-black text-lg text-bold">
+        历史习题记录
+      </view>
+    </view>
+    <view class="cu-form-group">
+      <view class="title">起始日期</view>
+      <picker mode="date" value="{{startDate}}" start="{{dateRange[0]}}" end="{{dateRange[1]}}" bindchange="StartDateChange">
+        <view class="picker">
+          {{startDate}}
+        </view>
+      </picker>
+    </view>
+    <view class="cu-form-group">
+      <view class="title">结束日期</view>
+      <picker mode="date" value="{{endDate}}" start="{{dateRange[0]}}" end="{{dateRange[1]}}" bindchange="EndDateChange">
+        <view class="picker">
+          {{endDate}}
+        </view>
+      </picker>
+    </view>
+    <view class='cu-form-group text-center'>
+      <view class='cu-btn bg-green shadow radius margin-left-auto' bindtap="SearchExercise">
+        搜索
+      </view>
+    </view>
+    <view class="bg-white" style='flex: auto; position:relative; margin-top: 10rpx'>
+      <view style='position: absolute; width: 100%; height: 100%;top:0; left:0;'>
+        <scroll-view scroll-y='true' style='height: 100%'>
+          <view wx:for="{{dailyExerciseList}}" wx:key="index" wx:for-item="exercise" data-id="{{index}}" >
+            <view class="padding-left padding-right solid-bottom bg-white" data-exercise="{{exercise}}" bindtap='SelectedExercise'>
+              <view class="flex align-center daily-exercise-item">
+                <view>
+                  {{exercise['TEdate']}}
+                </view>
+                <view style='margin-left: auto'>
+                  {{exercise['Total']}}道题
+                </view>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+  <mp-dialog show="{{searchStatus === -1}}" buttons="{{buttons}}" bindclose="SearchClose" bindbuttontap="SearchClose">
+    <view>{{searchError}}错误</view>
+  </mp-dialog>
+</template>
+
+<script>
+import wepy from 'wepy'
+import Panel from '@/components/panel' // alias example
+import moment from 'moment';
+import { ACTION_STATUS } from '@/common/enumeration';
+
+export default class Exercise extends wepy.page{
+  config = {
+    usingComponents: {
+      "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
+      "mp-gallery": "weui-miniprogram/gallery/gallery",
+    }
+
+  }
+
+  components = {
+    panel: Panel,
+  }
+
+  data={
+    buttons: [{text: '确定'}],
+    searchStatus: ACTION_STATUS.BEFORE,
+    searchError: "",
+    Sid: null,
+    exerciseList: [],
+    index: 0,
+    answer: [],
+    showOneButtonDialog: false,
+    oneButton: [{text: '确定'}],
+    inputDisabled:null,
+    imageUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+    audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
+    imageListOfName: [],
+    imageListOfAnswer: [],
+    startDate: moment().subtract(1, "months").format('YYYY-MM-DD'),
+    endDate: moment().format('YYYY-MM-DD'),
+    dateRange: ['2021-01-01', moment().format('YYYY-MM-DD')],
+    dailyExerciseList:[],
+  }
+  computed = {
+
+  }
+
+  methods = {
+    SelectedExercise: (e) => {
+      const {exercise:{TEdate: date}} = e.currentTarget.dataset;
+        this.$navigate({url:"todaygrade" + "?sid=" + this.Sid + "&" + "date=" + date});
+    },
+    SearchClose(e){
+      this.searchStatus = ACTION_STATUS.BEFORE;
+    },
+    StartDateChange(e){
+      const {detail:{value}} = e;
+      this.startDate = value;
+      if(value > this.endDate){
+        this.endDate = value;
+      }
+    },
+    EndDateChange(e){
+      const {detail: {value}} = e;
+      this.endDate = value;
+      if(value < this.startDate){
+        this.startDate = value;
+      }
+    },
+    SearchExercise(){
+      this.searchStatus = ACTION_STATUS.IN_PROGRESS;
+      this.searchError = "";
+      wepy.request({
+        url:wepy.$instance.globalData.serverUrl + '/app/today/search_exercise_history',
+        method: 'GET',
+        data:{
+          "Sid": this.Sid,
+          "startDate": this.startDate,
+          "endDate": this.endDate,
+        },
+        success: (res) => {
+          const exerciseList = res.data.Data;
+          if(!Array.isArray(exerciseList) || exerciseList.length <= 0){
+            this.searchStatus = ACTION_STATUS.ERROR;
+            this.searchError = "未搜索到时间段对应的习题信息，请重新选择范围";
+            return;
+          }
+          exerciseList.sort((a, b) => {
+            return a.TEdate > b.TEdate ? -1 : 1;
+          })
+          exerciseList.forEach((exercise) => {
+            exercise.TEdate = moment(exercise.TEdate).format("YYYY-MM-DD");
+          })
+          this.dailyExerciseList = exerciseList;
+          this.$apply();
+        },
+      })
+    },
+  }
+
+
+  onLoad(options) {
+    let self = this;
+    self.Sid = options.sid
+  }
+}
+</script>

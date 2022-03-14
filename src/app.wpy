@@ -10,6 +10,9 @@
   justify-content: space-between;
   box-sizing: border-box;
 }
+.margin-left-auto{
+    margin-left: auto;
+}
 </style>
 
 <script>
@@ -24,6 +27,7 @@ export default class extends wepy.app {
       'pages/login',
       'pages/example',
       'pages/exercise',
+        'pages/exercise-history',
       'pages/exercise-detail',
       'pages/create-exercise',
       'pages/edit-exercise',
@@ -92,7 +96,7 @@ export default class extends wepy.app {
     }else{
       this.globalData.userInfo = null
     }
-    
+
   }
 
 
@@ -138,5 +142,21 @@ export default class extends wepy.app {
     };
     return header
   }
+    post = (config) => {
+        config = {
+            ...config,
+            method: 'POST',
+            header: this.setHeader(),
+        }
+        wx.request(config)
+    }
+    get = (config) => {
+        config = {
+            ...config,
+            method: 'GET',
+            header: this.setHeader(),
+        }
+        wx.request(config)
+    }
 }
 </script>
