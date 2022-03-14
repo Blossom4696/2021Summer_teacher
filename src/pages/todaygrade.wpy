@@ -53,7 +53,6 @@
                 <block wx:if="{{exerciseList[index].Etype!=='听写'}}">
                     <name-image-list
                         :imageList.sync='currentImageListOfName'
-                        title='{{9}}'
                         type='show'
                     >
                     </name-image-list>
@@ -80,8 +79,7 @@
                 </view>
                 <image-list
                     :imageList.sync='currentImageListOfMyAnswer'
-                    title='{{9}}'
-                    :type.sync="imageListType"
+                    type="show"
                 ></image-list>
             </block>
         </view>
@@ -96,7 +94,6 @@
             <block wx:if="{{currentImageListOfAnswer.length > 0}}">
                 <answer-image-list
                     :imageList.sync='currentImageListOfAnswer'
-                    title='{{9}}'
                     type='show'
                 >
                 </answer-image-list>
@@ -172,9 +169,6 @@ export default class Exercise extends wepy.page{
         },
         hasComment(){
             return this.exerciseList[this.index] && this.exerciseList[this.index].TEstatus > 2;
-        },
-        imageListType (){
-            return this.exerciseList[this.index] && this.exerciseList[this.index].TEstatus > 1 ? "show" : "add";
         },
         currentImageListOfMyAnswer(){
             let imageList = this.exerciseList[this.index] ? this.exerciseList[this.index].TEanswerPath : undefined;
