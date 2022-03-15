@@ -42,6 +42,7 @@ page{
 <script>
 
 import wepy from 'wepy'
+import {setStorage} from "@/common/storage";
 export default class Login extends wepy.page{
     config = {
         usingComponents: {
@@ -67,19 +68,15 @@ export default class Login extends wepy.page{
                 },
                 success: function(res) {
                     console.log(res)
-                    if(res.data.Code == 1) {
-                        
-                        if(res.data.Msg == "Teacher login success!"){
-                            wepy.setStorageSync("sessionDate", Date.parse(new Date()))
-                            wepy.setStorageSync("sessionToken",res.data.Data["token"])
-                            wepy.setStorageSync("sessionUserInfo",res.data.Data["userinfo"])
-                            wepy.$instance.globalData.userInfo = res.data.Data["userinfo"]
-                            console.log("login success")
-                            self.$apply()
-                            setTimeout(function () {
-                                wepy.navigateBack({delta:1})
-                            }, 1000)
-                        }
+                    if(res.data.Code === 1) {
+                        const {token, userinfo} = res.data.Data;
+                        setStorage("sessionToken", token);
+                        setStorage("userInfo", userinfo);
+                        wepy.$instance.globalData.userInfo = userinfo;
+                        self.$apply()
+                        setTimeout(function () {
+                            wepy.navigateBack({delta:1})
+                        }, 1000)
                     }else if(res.data.Code == 2){
                         if(res.data.Msg == "Password not correct!"){
                             wx.showToast({

@@ -76,11 +76,11 @@
                 {{cname}}
             </view>
 
-            <view wx:if="{{teacher.Cnames.length == 0}}"> 
+            <view wx:if="{{teacher.Cnames.length == 0}}">
                 暂无管理校区
             </view>
         </view>
-        
+
 		<view wx:else>
             管理校区无法编辑，请联系管理员
         </view>
@@ -115,12 +115,10 @@ export default class Teacher extends wepy.page{
 
     methods= {
         onClickEditPassword(){
-            let self = this
-            wepy.navigateTo({ url: 'edit-password' + '?tid=' + self.Tid });
+            wepy.navigateTo({ url: 'edit-password' + '?tid=' + this.Tid });
         },
 
         onClickExitLogin(){
-            let self = this
             wx.showModal({
                 title: '退出登录',
                 content: '确定要退出登录吗？',
@@ -130,12 +128,10 @@ export default class Teacher extends wepy.page{
 					if (res.confirm) {
                         // 清除session缓存
                         wepy.removeStorageSync("sessionToken")
-                        wepy.removeStorageSync("sessionDate")
-                        wepy.removeStorageSync("sessionUserInfo")
-                        console.log("remove session!")
+                        wepy.removeStorageSync("userInfo")
                         wepy.$instance.onLaunch()
-                        self.onShow()
-                        self.$apply()
+                        this.onShow()
+                        this.$apply()
                     }
 				}
 			})
@@ -206,8 +202,8 @@ export default class Teacher extends wepy.page{
                 let lastindex = self.imgList[0].lastIndexOf("/")
                 sendFormData['Ticon'] = "user_avatar/" + self.imgList[0].substring(lastindex + 1, self.imgList[0].length)
             }
-            
-            
+
+
             console.log(sendFormData)
             wepy.request({
                 url:wepy.$instance.globalData.serverUrl + '/app/teacher/update_teacher',
@@ -230,17 +226,17 @@ export default class Teacher extends wepy.page{
                         }else{
                             self.getTeacherData()
                         }
-                        
+
                         self.isClickEdit = false
-                        
+
                         self.$apply()
-                    } 
+                    }
                 }
             })
-            
+
         },
 
-        
+
     }
 
 
@@ -267,7 +263,7 @@ export default class Teacher extends wepy.page{
                 failUp++;//失败+1
             },
             complete(e){
-                
+
                 count++;
                 if(count == length) {
                     console.log("上传成功")
@@ -277,12 +273,28 @@ export default class Teacher extends wepy.page{
                 }
             }
         });
-        
+
     }
 
     getTeacherData() {
         let self = this
-        wepy.request({
+        this.$parent.get('/app/teacher/get_teacher', {
+            Tid:self.Tid
+        }).then((res) => {
+            console.log(res)
+            if (res.data.Code == 1){
+                self.teacher = res.data.Data
+                self.copyTeacher = JSON.parse(JSON.stringify(self.teacher)) //深拷贝
+
+                self.imgList = []
+                self.imgList.push(self.imgUrl + res.data.Data.Ticon)
+                self.copyImgList = JSON.parse(JSON.stringify(self.imgList)) //深拷贝
+                self.$apply()
+
+            }
+
+        })
+/*        wepy.request({
             url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_teacher',
             method:'GET',
             header: wepy.$instance.setHeader(),
@@ -302,13 +314,13 @@ export default class Teacher extends wepy.page{
 
                 }
             }
-        })
+        })*/
     }
 
 
     onLoad() {
-        
-        
+
+
     }
 
     onShow(){

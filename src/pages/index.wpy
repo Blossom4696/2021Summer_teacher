@@ -10,7 +10,7 @@
 				<image style="width:50rpx;height:50rpx" class="margin margin-lr" src="{{userInfo==null?teacherIconNoLogin:imgUrl + userInfo.Ticon}}" background-size="cover"/>
 				<view class="margin">
                     <view class="text-black text-xl text-bold">{{ userInfo==null?'教师未登录（点击登录）':userInfo.Tnickname}}</view>
-                </view>   
+                </view>
 			</view>
 		</view>
 		<view wx:if="{{userInfo!=null}}" class="cu-item margin-top-xl margin-bottom-xl">
@@ -51,7 +51,7 @@
 						<view class="flex-twice">
 							<view class="text-center">{{askQuestion.AQtime}}</view>
 						</view>
-						
+
 					</view>
 				</view>
 			</view>
@@ -76,8 +76,8 @@
     config = {
 		usingComponents:{
 			"mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
-			
-		
+
+
 		}
     }
 
@@ -110,9 +110,8 @@
 
 
 		tapDialogOneButton(e) {
-			let self = this
 			this.$navigate({url:"login"})
-			self.dialogShowOneButton = false
+			this.dialogShowOneButton = false
 		},
 
 		tapDialogButton(e) {
@@ -128,7 +127,7 @@
             let id = e.currentTarget.dataset.id
             wx.navigateTo({
                 url:"askquestion-detail?aqid="+self.askQuestionList[id].AQid,
-                
+
             })
 		}
 
@@ -136,7 +135,7 @@
 
 	getAskQuestionList(){
 		let self = this
-        
+
         wepy.request({
                 url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_ask_question_list',
                 method:'GET',
@@ -163,11 +162,11 @@
 
     onLoad() {
       	let self = this
-		
+
     }
 
     onShow() {
-      
+
       let self = this
       if(wepy.$instance.globalData.userInfo!=null){
         self.userInfo = wepy.$instance.globalData.userInfo
