@@ -4,16 +4,19 @@
 
 <template>
 
-  	<view class="cu-card">
-		<view class="cu-item shadow radius">
-			<view class="flex align-center" @tap="onClickLogin">
-				<image style="width:50rpx;height:50rpx" class="margin margin-lr" src="{{userInfo==null?teacherIconNoLogin:imgUrl + userInfo.Ticon}}" background-size="cover"/>
-				<view class="margin">
-                    <view class="text-black text-xl text-bold">{{ userInfo==null?'教师未登录（点击登录）':userInfo.Tnickname}}</view>
+    <view class="cu-card">
+        <view class="cu-item shadow radius">
+            <view class="flex align-center" @tap="onClickLogin">
+                <image background-size="cover" class="margin margin-lr"
+                       src="{{userInfo==null?teacherIconNoLogin:imgUrl + userInfo.Ticon}}" style="width:50rpx;height:50rpx"/>
+                <view class="margin">
+                    <view class="text-black text-xl text-bold">
+                        {{ userInfo == null ? '教师未登录（点击登录）' : userInfo.Tnickname }}
+                    </view>
                 </view>
-			</view>
-		</view>
-		<view wx:if="{{userInfo!=null}}" class="cu-item margin-top-xl margin-bottom-xl">
+            </view>
+        </view>
+        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
             <view class="cu-list menu card-menuradius shadow">
                 <view class="cu-item arrow" data-url="create-todayexercise" @tap="onClick">
                     <view class="content">
@@ -28,156 +31,144 @@
             </view>
         </view>
 
-		<view wx:if="{{userInfo!=null}}" class="cu-item margin-top-xl margin-bottom-xl">
-			<view class="cu-item">
-				<view class="cu-list menu card-menuradius shadow">
-					<view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
-						<view class="content">
-							<view>学生提问</view>
-						</view>
-						<view class="flex justify-end">
-							更多
-						</view>
-					</view>
-				</view>
-				<view class="cu-list menu card-menuradius shadow">
-					<view class="cu-item flex align-center" wx:for="{{askQuestionList}}" wx:key="index" wx:for-item="askQuestion" data-id="{{index}}" @tap="onClickAskQuestion">
-						<view class="flex-sub">
-							<view class="text-center">{{askQuestion.Snickname}}</view>
-						</view>
-						<view class="flex-treble">
-							<view class="text-center">{{askQuestion.Eid==-1?'学生自主提问':askQuestion.Etitle}}</view>
-						</view>
-						<view class="flex-twice">
-							<view class="text-center">{{askQuestion.AQtime}}</view>
-						</view>
+        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
+            <view class="cu-item">
+                <view class="cu-list menu card-menuradius shadow">
+                    <view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
+                        <view class="content">
+                            <view>学生提问</view>
+                        </view>
+                        <view class="flex justify-end">
+                            更多
+                        </view>
+                    </view>
+                </view>
+                <view class="cu-list menu card-menuradius shadow">
+                    <view class="cu-item flex align-center" data-id="{{index}}" wx:for="{{askQuestionList}}"
+                          wx:for-item="askQuestion" wx:key="index" @tap="onClickAskQuestion">
+                        <view class="flex-sub">
+                            <view class="text-center">{{ askQuestion.Snickname }}</view>
+                        </view>
+                        <view class="flex-treble">
+                            <view class="text-center">{{ askQuestion.Eid == -1 ? '学生自主提问' : askQuestion.Etitle }}</view>
+                        </view>
+                        <view class="flex-twice">
+                            <view class="text-center">{{ askQuestion.AQtime }}</view>
+                        </view>
 
-					</view>
-				</view>
-			</view>
-		</view>
+                    </view>
+                </view>
+            </view>
+        </view>
     </view>
 
 
-	<mp-dialog title="登录" show="{{dialogShow}}" bindbuttontap="tapDialogButton" buttons="{{buttons}}">
-		<view>您还未登录，现在登录吗？</view>
-	</mp-dialog>
+    <mp-dialog bindbuttontap="tapDialogButton" buttons="{{buttons}}" show="{{dialogShow}}" title="登录">
+        <view>您还未登录，现在登录吗？</view>
+    </mp-dialog>
 
-	<mp-dialog title="登录" show="{{dialogShowOneButton}}" bindbuttontap="tapDialogOneButton" buttons="{{oneButton}}">
-		<view>登录信息已过期，请重新登录！</view>
-	</mp-dialog>
+    <mp-dialog bindbuttontap="tapDialogOneButton" buttons="{{oneButton}}" show="{{dialogShowOneButton}}" title="登录">
+        <view>登录信息已过期，请重新登录！</view>
+    </mp-dialog>
 </template>
 
 <script>
-	import wepy from 'wepy'
-	import moment from 'moment'
+import wepy from 'wepy'
+import moment from 'moment'
+import {getStorage} from "@/common/storage";
 
-	export default class Index extends wepy.page {
+export default class Index extends wepy.page {
     config = {
-		usingComponents:{
-			"mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
-
-
-		}
+        usingComponents: {
+            "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
+        }
     }
 
-    data={
-		teacherIconNoLogin:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=none_userinfo.png',
-		userInfo: null,
-		dialogShow: false,
-		dialogShowOneButton: false,
-		buttons: [{text: '稍后登录'}, {text: '确定'}],
-		oneButton: [{text: '确定'}],
-		imgUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
-		askQuestionList:[],
+    data = {
+        teacherIconNoLogin: wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=none_userinfo.png',
+        userInfo: null,
+        dialogShow: false,
+        dialogShowOneButton: false,
+        buttons: [{text: '稍后登录'}, {text: '确定'}],
+        oneButton: [{text: '确定'}],
+        imgUrl: wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        askQuestionList: [],
     }
 
-    methods= {
-		onClick(e) {
+    methods = {
+        onClick(e) {
             let self = this
             wx.navigateTo({
-                url:e.currentTarget.dataset.url
+                url: e.currentTarget.dataset.url
             })
         },
 
-		onClickLogin() {
-			let self = this
-			if(self.userInfo==null){
-				this.$navigate({url:"login"})
-			}
-		},
+        onClickLogin() {
+            let self = this
+            if (self.userInfo == null) {
+                this.$navigate({url: "login"})
+            }
+        },
 
 
+        tapDialogOneButton(e) {
+            this.$navigate({url: "login"})
+            this.dialogShowOneButton = false
+        },
 
-		tapDialogOneButton(e) {
-			this.$navigate({url:"login"})
-			this.dialogShowOneButton = false
-		},
+        tapDialogButton(e) {
+            let self = this
+            if (e.detail.index == 1) {
+                this.$navigate({url: "login"})
+            }
+            self.dialogShow = false
+        },
 
-		tapDialogButton(e) {
-			let self = this
-			if (e.detail.index == 1) {
-			this.$navigate({url:"login"})
-			}
-			self.dialogShow = false
-		},
-
-		onClickAskQuestion(e){
-			let self = this
+        onClickAskQuestion(e) {
+            let self = this
             let id = e.currentTarget.dataset.id
             wx.navigateTo({
-                url:"askquestion-detail?aqid="+self.askQuestionList[id].AQid,
-
+                url: "askquestion-detail?aqid=" + self.askQuestionList[id].AQid,
             })
-		}
+        }
 
     }
 
-	getAskQuestionList(){
-		let self = this
+    getAskQuestionList() {
+        let self = this
 
         wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/teacher/get_ask_question_list',
-                method:'GET',
-                header: wepy.$instance.setHeader(),
-                data:{
-					unresolved: "0",
-					date:"all",
-				},
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        self.askQuestionList = res.data.Data
+            url: wepy.$instance.globalData.serverUrl + '/app/teacher/get_ask_question_list',
+            method: 'GET',
+            header: wepy.$instance.setHeader(),
+            data: {
+                unresolved: "0",
+                date: "all",
+            },
+            success: function (res) {
+                console.log(res)
+                if (res.data.Code == 1) {
+                    self.askQuestionList = res.data.Data
 
-						for(let i=0;i<self.askQuestionList.length;i++){
-							self.askQuestionList[i].AQtime = moment(self.askQuestionList[i].AQtime).format('YYYY-MM-DD HH:mm:ss')
-						}
-                        self.$apply()
+                    for (let i = 0; i < self.askQuestionList.length; i++) {
+                        self.askQuestionList[i].AQtime = moment(self.askQuestionList[i].AQtime).format('YYYY-MM-DD HH:mm:ss')
                     }
+                    self.$apply()
                 }
-            })
-	}
-
-
-
-    onLoad() {
-      	let self = this
-
+            }
+        })
     }
 
     onShow() {
-
-      let self = this
-      if(wepy.$instance.globalData.userInfo!=null){
-        self.userInfo = wepy.$instance.globalData.userInfo
-		self.getAskQuestionList()
-      }else{
-		  self.userInfo=null
-	  }
-      if(self.userInfo==null && !self.dialogShowOneButton){
-			self.dialogShow = true
-		}
+        if (getStorage("sessionToken")) {
+            this.dialogShow = false;
+            this.dialogShowOneButton = false;
+            this.getAskQuestionList();
+            this.userInfo = getStorage("userInfo")
+        } else {
+            this.dialogShow = true;
+        }
     }
-  }
+}
 
 </script>

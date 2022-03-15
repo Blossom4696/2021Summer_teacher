@@ -92,7 +92,9 @@ export default class extends wepy.app {
     onLaunch() {
         let token = getStorage("sessionToken");
         if (!token) {
-            this.$navigate({url: "login"})
+            setTimeout(() => {
+                wx.navigateTo({url: "login"})
+            }, 100)
         }
         this.globalData.userInfo = getStorage("userInfo");
     }
@@ -135,11 +137,25 @@ export default class extends wepy.app {
         });
     }
 
-    post(url, data) {
+    postWithToken = (url, data) => {
+        if(!getStorage('sessionToken')){
+            return Promise.reject("No token")
+        }
+        return this.post(url, data)
+    }
+
+    post = (url, data) => {
         return this.req('POST', url, data);
     }
 
-    get(url, data) {
+    getWithToken = (url, data) => {
+        if(!getStorage('sessionToken')){
+            return Promise.reject("No token")
+        }
+        return this.get(url, data)
+    }
+
+    get = (url, data) => {
         return this.req('GET', url, data);
     }
 }

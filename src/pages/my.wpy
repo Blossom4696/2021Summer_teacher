@@ -278,7 +278,7 @@ export default class Teacher extends wepy.page{
 
     getTeacherData() {
         let self = this
-        this.$parent.get('/app/teacher/get_teacher', {
+        this.$parent.getWithToken('/app/teacher/get_teacher', {
             Tid:self.Tid
         }).then((res) => {
             console.log(res)
