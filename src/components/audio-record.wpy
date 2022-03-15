@@ -1,0 +1,129 @@
+<template>
+    <view class='cu-form-group'>
+        <radio-group bindchange='audioSelectRadioChange' class='flex padding'>
+            <view class='flex-sub flex align-center' wx:for='{{audioSelectList}}' wx:key='{{item.value}}'>
+                <view class='margin-xs'>
+                    <radio checked='{{item.checked}}' value='{{item.value}}'/>
+                </view>
+                <view class=''>{{ item.name }}</view>
+            </view>
+        </radio-group>
+    </view>
+    <view class='cu-form-group'
+          wx:if="{{audioSelectList[0].checked}}">
+        <button class='cu-btn bg-green shadow' @tap='onClickUploadMP3'>
+            上传音频
+        </button>
+        <view>（仅限MP3文件）</view>
+        <view>{{ audioName == null ? '无音频文件' : audioName }}</view>
+    </view>
+
+    <view class='cu-form-group' wx:if="{{audioSelectList[1].checked}}">
+        <button class='cu-btn bg-green shadow' @touchend='endRecord' @touchstart='startRecord'>
+            长按录音
+        </button>
+        <view class='action'>{{ duration }}s</view>
+<!--        <view class='action' wx:if="{{audioUploadPath!=''}}">{{ duration }}</view>
+        <view class='action' wx:else>0'000s</view>-->
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+const recorderManager = wx.getRecorderManager();
+export default class AudioRecord extends wepy.component {
+    data = {
+        audioSelectList: [{
+            value: '0',
+            name: '文件上传',
+            checked: true
+        }, {
+            value: '1',
+            name: '自行录音',
+            checked: false
+        }],
+        duration: Number(0).toFixed(3)
+    }
+
+    props = {
+        audioUploadPath: {
+            type: String,
+            default: ""
+        },
+    }
+
+    touchStatus = false;
+
+    methods = {
+        audioSelectRadioChange(e) {
+            for (let i = 0, len = this.audioSelectList.length; i < len; ++i) {
+                this.audioSelectList[i].checked = this.audioSelectList[i].value === e.detail.value;
+            }
+        },
+
+        onClickUploadMP3(e) {
+            let self = this;
+            wx.chooseMessageFile({
+                count: 1,
+                type: 'file',
+                success(res) {
+                    // 上传文件为MP3文件
+                    if (res.tempFiles[0].name.indexOf('.mp3') != -1) {
+                        self.$emit("audioChange", res.tempFiles[0].path);
+                        self.$apply();
+                    }
+
+                }
+            });
+        },
+
+        startRecord(e) {
+            const options = {
+                duration: 60000,
+                sampleRate: 16000,
+                numberOfChannels: 1,
+                encodeBitRate: 48000,
+                format: 'mp3',
+                frameSize: 50
+            };
+            this.touchStatus = true;
+            setTimeout(() => {
+                if(this.touchStatus){
+                    recorderManager.start(options);
+                }else{
+                    console.log("短触摸");
+                }
+
+            },100)
+            recorderManager.onStart(() => {
+                let full = false;
+                this.imageShow = setInterval(() => {
+                    const image = full ? "../images/mic-full.png" : "../images/mic-half.png"
+                    full = !full;
+                    wx.showToast({
+                        title: "录音中",
+                        image: image,
+                    })
+                },500)
+            });
+        },
+
+        endRecord(e) {
+            console.log(e)
+            let self = this;
+            this.touchStatus = false;
+            recorderManager.stop();
+            recorderManager.onStop((res) => {
+                clearInterval(this.imageShow);
+                console.log('停止录音', res);
+                self.audioUploadPath = res.tempFilePath;
+                self.duration = (res.duration/1000).toFixed(3);
+                this.$emit("audioChange", res.tempFilePath);
+                self.$apply();
+                wx.showToast({
+                    title: '录音完成'
+                });
+            });
+        },
+    }
+}
+</script>
