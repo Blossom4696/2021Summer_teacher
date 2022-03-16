@@ -31,7 +31,7 @@
             </view>
         </view>
 
-        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
+<!--        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
             <view class="cu-item">
                 <view class="cu-list menu card-menuradius shadow">
                     <view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
@@ -59,23 +59,24 @@
                     </view>
                 </view>
             </view>
-        </view>
+        </view>-->
     </view>
 
 
     <mp-dialog bindbuttontap="tapDialogButton" buttons="{{buttons}}" show="{{dialogShow}}" title="登录">
-        <view>您还未登录，现在登录吗？</view>
-    </mp-dialog>
-
-    <mp-dialog bindbuttontap="tapDialogOneButton" buttons="{{oneButton}}" show="{{dialogShowOneButton}}" title="登录">
-        <view>登录信息已过期，请重新登录！</view>
+        <view>{{ loginTip }}</view>
     </mp-dialog>
 </template>
 
 <script>
 import wepy from 'wepy'
 import moment from 'moment'
-import {getStorage} from "@/common/storage";
+import {getStorage, isExist, isExpired} from "@/common/storage";
+
+const LOGIN_TIP = {
+    timeout: "您的登录信息已过期，请登录",
+    noSession: "您尚未登录，是否现在登录"
+}
 
 export default class Index extends wepy.page {
     config = {
@@ -88,11 +89,10 @@ export default class Index extends wepy.page {
         teacherIconNoLogin: wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=none_userinfo.png',
         userInfo: null,
         dialogShow: false,
-        dialogShowOneButton: false,
         buttons: [{text: '稍后登录'}, {text: '确定'}],
-        oneButton: [{text: '确定'}],
         imgUrl: wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
         askQuestionList: [],
+        loginTip: LOGIN_TIP.noSession,
     }
 
     methods = {
@@ -108,12 +108,6 @@ export default class Index extends wepy.page {
             if (self.userInfo == null) {
                 this.$navigate({url: "login"})
             }
-        },
-
-
-        tapDialogOneButton(e) {
-            this.$navigate({url: "login"})
-            this.dialogShowOneButton = false
         },
 
         tapDialogButton(e) {
@@ -136,37 +130,33 @@ export default class Index extends wepy.page {
 
     getAskQuestionList() {
         let self = this
+        this.$parent.getWithToken('/app/teacher/get_ask_question_list', {
+            unresolved: "0",
+            date: "all",
+        }).then(function (res) {
+            console.log(res)
+            if (res.data.Code == 1) {
+                self.askQuestionList = res.data.Data
 
-        wepy.request({
-            url: wepy.$instance.globalData.serverUrl + '/app/teacher/get_ask_question_list',
-            method: 'GET',
-            header: wepy.$instance.setHeader(),
-            data: {
-                unresolved: "0",
-                date: "all",
-            },
-            success: function (res) {
-                console.log(res)
-                if (res.data.Code == 1) {
-                    self.askQuestionList = res.data.Data
-
-                    for (let i = 0; i < self.askQuestionList.length; i++) {
-                        self.askQuestionList[i].AQtime = moment(self.askQuestionList[i].AQtime).format('YYYY-MM-DD HH:mm:ss')
-                    }
-                    self.$apply()
+                for (let i = 0; i < self.askQuestionList.length; i++) {
+                    self.askQuestionList[i].AQtime = moment(self.askQuestionList[i].AQtime).format('YYYY-MM-DD HH:mm:ss')
                 }
+                self.$apply()
             }
         })
     }
 
     onShow() {
-        if (getStorage("sessionToken")) {
-            this.dialogShow = false;
-            this.dialogShowOneButton = false;
-            this.getAskQuestionList();
-            this.userInfo = getStorage("userInfo")
-        } else {
+        if (!isExist("sessionToken")){
             this.dialogShow = true;
+            this.loginTip = LOGIN_TIP.noSession;
+        }else if(!isExpired("sessionToken")){
+            this.dialogShow = true;
+            this.loginTip = LOGIN_TIP.timeout;
+        }else{
+            this.dialogShow = false;
+            // this.getAskQuestionList();
+            this.userInfo = getStorage("userInfo")
         }
     }
 }

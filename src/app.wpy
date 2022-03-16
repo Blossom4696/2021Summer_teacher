@@ -108,6 +108,12 @@ export default class extends wepy.app {
         return header
     }
 
+    resetSessionToken(){
+        wx.removeStorageSync("sessionToken");
+        wx.removeStorageSync("userInfo");
+        this.onLaunch();
+    }
+
     req(type, url, data) {
         const header = { // 根据需求设置请求头Authorization
             'content-type': 'application/json',
@@ -139,9 +145,10 @@ export default class extends wepy.app {
 
     postWithToken = (url, data) => {
         if(!getStorage('sessionToken')){
-            return Promise.reject("No token")
+            this.resetSessionToken();
+            return Promise.reject("No token");
         }
-        return this.post(url, data)
+        return this.post(url, data);
     }
 
     post = (url, data) => {
@@ -150,6 +157,7 @@ export default class extends wepy.app {
 
     getWithToken = (url, data) => {
         if(!getStorage('sessionToken')){
+            this.resetSessionToken();
             return Promise.reject("No token")
         }
         return this.get(url, data)

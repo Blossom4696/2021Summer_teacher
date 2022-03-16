@@ -28,4 +28,20 @@ export function getStorage(key){
   }
 }
 
+export function isExist(key){
+  return !!wx.getStorageSync(key);
+}
+
+export function isExpired(key){
+  let valueWithInfo = wx.getStorageSync(key);
+  if(!valueWithInfo){
+    return null;
+  }
+  if(valueWithInfo.expiredAt && (valueWithInfo.expiredAt < 0 || valueWithInfo.expiredAt > new Date().valueOf())){
+    return true;
+  }else{
+    wx.removeStorageSync(key)
+    return false;
+  }
+}
 
