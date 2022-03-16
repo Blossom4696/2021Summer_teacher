@@ -23,3 +23,7 @@ export const autoCorrectRange = [{
   value: 2,
   label: "手动"
 }];
+
+export const selectionConfigRange = [[2,3,4],["A", "a", "1", "i"]]
+
+export const selectionAnswerRange = [['A', 'B', 'C', 'D'], ['a', 'b', 'c', 'd'], ['1', '2', '3', '4'], ['i', 'ii', 'iii', 'iiii']];

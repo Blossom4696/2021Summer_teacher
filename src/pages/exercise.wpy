@@ -489,21 +489,17 @@ page {
         },
 
         getExerciseField(self) {
-            wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/user/common/get_exercise_field',
-                method:'GET',
-                header: wepy.$instance.setHeader(),
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        self.exerciseField = res.data.Data
-                        self.$apply()
-                    }
-                },
-                fail: function(res){
-                    self.exerciseField = []
+            self.$parent.getWithToken({
+                url: '/app/user/common/get_exercise_field',
+            }).then(function(res) {
+                console.log(res)
+                if (res.data.Code == 1){
+                    self.exerciseField = res.data.Data
+                    self.$apply()
                 }
-            })
+            }).catch(function(res){
+                self.exerciseField = []
+            });
         },
 
         getExerciseSort(self) {
