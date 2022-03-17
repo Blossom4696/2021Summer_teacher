@@ -1,31 +1,29 @@
 <template>
     <block wx:if="{{type === 'add' || imageList.length > 0}}">
-        <view className='cu-bar bg-white margin-top' wx:if="{{type === 'add'}}">
-            <view className='action'>
-                图片上传
+        <view class='cu-bar bg-white' wx:if="{{type === 'add'}}">
+            <view class='action'>
+                {{ title }}
             </view>
-            <view className='action'>
+            <view class='action'>
                 {{ imageList.length }}/{{ maxSize }}
             </view>
         </view>
-        <view className='{{listWrapperClass}}'>
-            <view bindtap='ViewImage' className='bg-img' wx:for='{{imageList}}'
+        <view class='{{listWrapperClass}}' style='margin: 0 30rpx'>
+            <view bindtap='ViewImage' class='bg-img' wx:for='{{imageList}}'
                   wx:key='{{index}}'>
                 <image mode='{{mode}}' src='{{imageList[index]}}'></image>
-                <view catchtap='DelImg' className='cu-tag bg-red' data-index='{{index}}'
-                      wx:if="{{imageList.length < maxSize && type === 'add'}}">
-                    <text className='cuIcon-close'></text>
+                <view catchtap='DelImg' class='cu-tag bg-red' data-index='{{index}}' wx:if="{{imageList.length < maxSize && type === 'add'}}">
+                    <text class='cuIcon-close'></text>
                 </view>
             </view>
-            <view bindtap='ChooseImage' className='solids' wx:if="{{imageList.length < maxSize && type === 'add'}}">
-                <text className='cuIcon-cameraadd'></text>
+            <view bindtap='ChooseImage' class='solids' wx:if="{{imageList.length < maxSize && type === 'add'}}">
+                <text class='cuIcon-cameraadd'></text>
             </view>
         </view>
     </block>
 </template>
 <script>
 import wepy from 'wepy';
-
 export default class ImageList extends wepy.component {
 
     data = {
@@ -34,6 +32,10 @@ export default class ImageList extends wepy.component {
     }
 
     props = {
+        title:{
+            type: String,
+            default: "图片上传"
+        },
         maxSize: {
             type: String,
             default: "9"
@@ -42,21 +44,21 @@ export default class ImageList extends wepy.component {
             type: Array,
             default: []
         },
-        type: {
-            type: String,
+        type:{
+            type:String,
             default: "add"
         },
     };
 
     computed = {
-        listWrapperClass() {
-            if (this.type === "add") {
+        listWrapperClass(){
+            if(this.type === "add"){
                 return "grid col-4 grid-square flex-sub";
-            } else {
+            }else{
                 return "grid col-1";
             }
         },
-        mode() {
+        mode(){
             return this.type === 'add' ? 'aspectFill' : 'widthFix';
         }
     }

@@ -1,0 +1,86 @@
+<template>
+    <picker
+        bindcolumnchange='onColumnChange'
+        bindchange='onChange'
+        name='{{name}}'
+        range='{{range}}'
+        value='{{value}}'
+        mode="multiSelector">
+        <view class='picker'>
+            <text class='text-lg'>{{ text }}</text>
+        </view>
+    </picker>
+</template>
+<script>
+import wepy from 'wepy';
+import {subjectRange, typeRange} from "@/common/constant";
+import {getSubjectAndType} from "@/common/param-conversion";
+import {isValidValue} from "@/common/utils";
+
+export default class SubjectAndTypePicker extends wepy.component {
+
+    isPicking = false;
+
+    props = {
+        value: {
+            type: Array,
+            default: [null, null],
+            twoWay: true,
+        },
+        name: {
+            type: String,
+        },
+    }
+
+    watch = {
+        value(newValue){
+            this.pickingValue = [...newValue];
+        }
+    }
+
+    computed = {
+        range(){
+            const arr = [subjectRange];
+            const value = this.isPicking ? this.pickingValue : this.value;
+            if(value[0] === null){
+                arr.push(typeRange[subjectRange[0]]);
+            }else{
+                const subject = subjectRange[value[0]];
+                arr.push(typeRange[subject]);
+            }
+            return arr;
+        },
+        text(){
+            const value = this.value;
+            const {subject, type, error} = getSubjectAndType(value);
+            if(isValidValue(error)){
+                return "请选择学科和题型"
+            }else{
+                return subject + "-" + type;
+            }
+        }
+    }
+
+    methods = {
+        onChange(e){
+            this.isPicking = false;
+            if(e.detail.value[1] === null){
+                e.detail.value[1] = 0;
+            }
+            this.pickingValue = [...e.detail.value];
+            this.value = e.detail.value;
+        },
+        onColumnChange(e){
+            this.isPicking = true;
+            this.pickingValue[e.detail.column] = e.detail.value
+            if(e.detail.column === 0){
+                this.pickingValue[1] = 0;
+            }
+        }
+    }
+
+    onLoad(){
+        this.pickingValue = [...this.value];
+    }
+}
+</script>

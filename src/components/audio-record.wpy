@@ -41,7 +41,8 @@ export default class AudioRecord extends wepy.component {
             name: '自行录音',
             checked: false
         }],
-        duration: Number(0).toFixed(3)
+        duration: Number(0).toFixed(3),
+        audioName: null,
     }
 
     props = {
@@ -49,6 +50,15 @@ export default class AudioRecord extends wepy.component {
             type: String,
             default: ""
         },
+    }
+
+    watch = {
+        audioUploadPath() {
+            const lastIndex = this.audioUploadPath.lastIndexOf("/");
+            const temp = this.audioUploadPath.substring(lastIndex + 1);
+            this.audioName = temp.length > 15 ? '未知音频.mp3': temp;
+            this.$apply();
+        }
     }
 
     touchStatus = false;

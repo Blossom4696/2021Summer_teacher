@@ -1,0 +1,43 @@
+<template>
+    <picker bindchange='selectionAnswerChange' name='{{name}}' range='{{selectionAnswerPicker}}'
+            value='{{value}}'>
+        <view class='picker'>
+            <text class='text-lg'>{{ value == null ? "请选择一个选项" : selectionAnswerPicker[value] }}</text>
+        </view>
+    </picker>
+</template>
+<script>
+import wepy from 'wepy';
+import {selectionAnswerRange, selectionConfigRange} from "@/common/constant";
+
+export default class SelectionPicker extends wepy.component {
+    props = {
+        value: {
+            type: String,
+        },
+        name: {
+            type: String,
+        },
+        selectionConfig: {
+            type: Array,
+            default: [0, 0],
+        },
+    }
+
+    computed = {
+        selectionAnswerPicker(){
+            const [lengthIndex, typeIndex] = this.selectionConfig;
+            const length = selectionConfigRange[0][lengthIndex];
+            const type = selectionConfigRange[1][typeIndex];
+            console.log("selection answer picker", length, type)
+            return selectionAnswerRange[typeIndex].slice(0, length);
+        }
+    }
+
+    methods = {
+        selectionAnswerChange(e) {
+            this.$emit("selectionChange", e.detail.value);
+        },
+    };
+}
+</script>
