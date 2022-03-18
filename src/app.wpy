@@ -111,7 +111,10 @@ export default class extends wepy.app {
     resetSessionToken(){
         wx.removeStorageSync("sessionToken");
         wx.removeStorageSync("userInfo");
-        this.onLaunch();
+        setTimeout(() => {
+            wx.navigateTo({url: "login"})
+        }, 100)
+        this.globalData.userInfo = null;
     }
 
     req(type, url, data) {
@@ -141,6 +144,18 @@ export default class extends wepy.app {
                 timeout: 10000
             });
         });
+    }
+
+    putWithToken = (url, data) => {
+        if(!getStorage('sessionToken')){
+            this.resetSessionToken();
+            return Promise.reject("No token");
+        }
+        return this.put(url, data);
+    }
+
+    put = (url, data) => {
+        return this.req('PUT', url, data);
     }
 
     postWithToken = (url, data) => {

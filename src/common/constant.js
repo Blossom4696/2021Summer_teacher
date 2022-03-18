@@ -1,7 +1,7 @@
 export const gradeRange = [
   "小学",
   '七年级上','七年级下','八年级上','八年级下','九年级上','九年级下',
-  '高一上','高一上','高二上','高二上','高三上','高三下',
+  '高一上','高一下','高二上','高二上','高三上','高三下',
   "大学",
 ];
 
@@ -16,11 +16,16 @@ export const typeRange = {
 
 export const difficultRange = ['简单', '中等', '困难', '竞赛'];
 
+export const AUTO_CORRECT = {
+  AUTO: 1,
+  MANUAL: 2,
+}
+
 export const autoCorrectRange = [{
-  value: 1,
+  value: AUTO_CORRECT.AUTO,
   label: "自动"
 },{
-  value: 2,
+  value: AUTO_CORRECT.MANUAL,
   label: "手动"
 }];
 
