@@ -169,7 +169,7 @@ page {
             <button class="cu-btn bg-{{isClickPrint?'grey':'green'}} shadow-blur round" @tap="clickPrint()">{{isClickPrint?'取消':'打印习题'}}</button>
         </view>
         <view class="flex-sub padding flex align-center flex justify-center">
-            <checkbox wx:if="{{isClickPrint}}" @tap="checkboxChange" checked="{{isPrintAnswer}}">
+            <checkbox wx:if="{{isClickPrint}}" @tap="checkboxChange" checked="{{isPrintAnswer}}"/>
             <view wx:if="{{isClickPrint}}" class="margin-left-xs text-sm">打印答案</view>
         </view>
         <view class="flex-sub padding flex justify-end">
@@ -467,31 +467,24 @@ page {
         },
 
         getExercise(self) {
-            wepy.request({
-                url:wepy.$instance.globalData.serverUrl + '/app/exercise/get_all_exercise',
-                method:'GET',
-                header: wepy.$instance.setHeader(),
-                success: function(res) {
-                    console.log(res)
-                    if (res.data.Code == 1){
-                        self.exerciseList = res.data.Data
-                        self.selectIconOfExercise = []
-                        for(let i=0;i<self.exerciseList.length;i++){
-                            self.selectIconOfExercise.push(self.nonselectIcon)
-                        }
-                        self.$apply()
+            wepy.$instance.getWithToken('/app/exercise/get_all_exercise').then((res) => {
+                console.log(res)
+                if (res.data.Code == 1){
+                    self.exerciseList = res.data.Data
+                    self.selectIconOfExercise = []
+                    for(let i=0;i<self.exerciseList.length;i++){
+                        self.selectIconOfExercise.push(self.nonselectIcon)
                     }
-                },
-                fail: function(res){
-                    self.exerciseList = []
+                    self.$apply()
                 }
+            }).catch((error) => {
+                self.exerciseList = []
             })
         },
 
         getExerciseField(self) {
-            self.$parent.getWithToken({
-                url: '/app/user/common/get_exercise_field',
-            }).then(function(res) {
+            console.log("get exercise fields");
+            self.$parent.getWithToken('/app/user/common/get_exercise_field').then(function(res) {
                 console.log(res)
                 if (res.data.Code == 1){
                     self.exerciseField = res.data.Data

@@ -31,7 +31,7 @@
             </view>
         </view>
 
-<!--        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
+        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
             <view class="cu-item">
                 <view class="cu-list menu card-menuradius shadow">
                     <view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
@@ -59,7 +59,7 @@
                     </view>
                 </view>
             </view>
-        </view>-->
+        </view>
     </view>
 
 
@@ -155,7 +155,7 @@ export default class Index extends wepy.page {
             this.loginTip = LOGIN_TIP.timeout;
         }else{
             this.dialogShow = false;
-            // this.getAskQuestionList();
+            this.getAskQuestionList();
             this.userInfo = getStorage("userInfo")
         }
     }

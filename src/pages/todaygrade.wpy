@@ -74,7 +74,7 @@
                 学生未作答
             </view>
             <block wx:else>
-                <view class='text-lg' wx:if="{{exerciseList[index].TEanswerTxt !== ''}}">
+                <view class='margin text-lg' wx:if="{{exerciseList[index].TEanswerTxt !== ''}}">
                     {{ exerciseList[index].TEanswerTxt }}
                 </view>
                 <image-list
@@ -139,6 +139,7 @@ import wepy from 'wepy'
 import moment from "moment";
 import ImageList from "@/components/image-list"
 import {AUDIO_URL, IMAGE_OF_EXERCISE_URL, IMAGE_OF_MY_ANSWER_URL, IMAGE_URL} from "@/common/url";
+import {getSelectionText} from "@/common/param-conversion";
 
 export default class Exercise extends wepy.page{
     config = {
@@ -276,6 +277,11 @@ export default class Exercise extends wepy.page{
                             : [];
                         exercise.EanswerPath = EanswerPath !== "" ? EanswerPath.split(";").map(x => IMAGE_OF_EXERCISE_URL + x) : [];
                         exercise.TEanswerPath = TEanswerPath !== "" ? TEanswerPath.split(";").map(x => IMAGE_OF_MY_ANSWER_URL + x) : [];
+                        if(exercise.Etype === "选择题"){
+                            let selectionConfig = JSON.parse(exercise.EtypeDetail);
+                            exercise.TEanswerTxt = getSelectionText(exercise.TEanswerTxt, selectionConfig);
+                            exercise.EanswerTxt = getSelectionText(exercise.EanswerTxt, selectionConfig);
+                        }
                         return exercise
                     });
                     console.log(res);

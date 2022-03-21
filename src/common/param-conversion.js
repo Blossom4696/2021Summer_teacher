@@ -1,4 +1,4 @@
-import {subjectRange, typeRange} from "./constant";
+import {selectionAnswerRange, selectionConfigRange, subjectRange, typeRange} from "./constant";
 import {isValidValue} from "@/common/utils";
 
 export const getSubjectAndType = (value) => {
@@ -33,4 +33,10 @@ export const getSubjectAndTypeIndex = (subject, type) => {
         index.push(0);
     }
     return index;
+}
+
+export const getSelectionText = (index, config) => {
+    const [_, typeIndex] = config;
+    const answerList = selectionAnswerRange[typeIndex];
+    return answerList[index];
 }

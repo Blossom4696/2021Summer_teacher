@@ -79,6 +79,7 @@ page{
 <script>
 import wepy from 'wepy'
 import {IMAGE_OF_EXERCISE_URL} from "@/common/url";
+import {getSelectionText} from "@/common/param-conversion";
 
 export default class Index extends wepy.page {
     config = {
@@ -172,15 +173,19 @@ export default class Index extends wepy.page {
                 success: function(res) {
                     console.log(res)
                     if (res.data.Code == 1){
-                        self.exercise = res.data.Data
-                        if(res.data.Data.EnamePath!=""){
-                            let tmpList = res.data.Data.EnamePath.split(";")
+                        const exercise = res.data.Data;
+                        if(exercise.EnamePath!=""){
+                            let tmpList = exercise.EnamePath.split(";")
                             self.imageListOfName = tmpList.map(x => self.imageUrl + x)
                         }
-                        if(res.data.Data.EanswerPath!=""){
-                            let tmpList = res.data.Data.EanswerPath.split(";")
+                        if(exercise.EanswerPath!=""){
+                            let tmpList = exercise.EanswerPath.split(";")
                             self.imageListOfAnswer = tmpList.map(x => self.imageUrl + x)
                         }
+                        if(exercise.Etype === "选择题"){
+                            exercise.EanswerTxt = getSelectionText(exercise.EanswerTxt, JSON.parse(exercise.EtypeDetail));
+                        }
+                        self.exercise = exercise;
                         self.$apply()
                     }
                 }
