@@ -78,6 +78,7 @@ page{
 
 <script>
 import wepy from 'wepy'
+import {IMAGE_OF_EXERCISE_URL} from "@/common/url";
 
 export default class Index extends wepy.page {
     config = {
@@ -88,7 +89,7 @@ export default class Index extends wepy.page {
     data = {
         Eid:0,
         exercise:{},
-        imageUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_image?name=',
+        imageUrl: IMAGE_OF_EXERCISE_URL,
         audioUrl:wepy.$instance.globalData.serverUrl + '/app/file/get_audio?name=',
         imageListOfName: [],
         imageListOfAnswer: [],

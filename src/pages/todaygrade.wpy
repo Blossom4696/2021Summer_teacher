@@ -138,7 +138,7 @@
 import wepy from 'wepy'
 import moment from "moment";
 import ImageList from "@/components/image-list"
-import {AUDIO_URL, IMAGE_OF_MY_ANSWER_URL, IMAGE_URL} from "@/common/url";
+import {AUDIO_URL, IMAGE_OF_EXERCISE_URL, IMAGE_OF_MY_ANSWER_URL, IMAGE_URL} from "@/common/url";
 
 export default class Exercise extends wepy.page{
     config = {
@@ -272,9 +272,9 @@ export default class Exercise extends wepy.page{
                     self.exerciseList = res.data.Data.map((exercise) => {
                         const {EnamePath, EanswerPath, TEanswerPath, Etype} = exercise;
                         exercise.EnamePath = EnamePath !== "" ? EnamePath.split(";").
-                            map(x => (Etype === "听写" ? AUDIO_URL : IMAGE_URL) + x)
+                            map(x => (Etype === "听写" ? AUDIO_URL : IMAGE_OF_EXERCISE_URL) + x)
                             : [];
-                        exercise.EanswerPath = EanswerPath !== "" ? EanswerPath.split(";").map(x => IMAGE_URL + x) : [];
+                        exercise.EanswerPath = EanswerPath !== "" ? EanswerPath.split(";").map(x => IMAGE_OF_EXERCISE_URL + x) : [];
                         exercise.TEanswerPath = TEanswerPath !== "" ? TEanswerPath.split(";").map(x => IMAGE_OF_MY_ANSWER_URL + x) : [];
                         return exercise
                     });
