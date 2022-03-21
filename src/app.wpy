@@ -173,6 +173,9 @@ export default class extends wepy.app {
                 fail: function (err) {
                     reject(err);
                 },
+                complete: function(){
+                    wx.hideNavigationBarLoading();
+                },
                 timeout: 10000
             });
         });
