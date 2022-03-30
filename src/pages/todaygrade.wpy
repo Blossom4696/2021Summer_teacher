@@ -101,12 +101,12 @@
             <view class='text-xl text-black text-bold'>
                 老师评价
             </view>
-            <block wx:if="{{hasComment}}">
+<!--            <block wx:if="{{hasComment}}">
                 <view class='margin text-lg'>
                     {{ exerciseList[index].TEcomment }}
                 </view>
-            </block>
-            <block wx:else>
+            </block>-->
+            <block>
                 <input
                     class='input text-lg margin'
                     placeholder='请将评价填写在此处'
@@ -223,7 +223,7 @@ export default class Exercise extends wepy.page{
             const self = this;
             const {exerciseList} = this;
             const changedExerciseList = exerciseList.filter((exercise) => {
-                return exercise.changed && exercise.TEcomment;
+                return exercise.changed;
             })
             if(changedExerciseList.length === 0){
                 wx.showToast({
