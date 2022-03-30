@@ -45,9 +45,14 @@ page{
                 </view>
             </view>
             
-            <audio wx:if="{{wrongProblem.Wtype=='听写' && wrongProblem.WproblemPath!=''}}" src="{{wrongProblem.WproblemPath?(audioUrl + wrongProblem.WproblemPath):''}}" controls="true" name="" author=""></audio>
-
-            
+            <audio
+                wx:if="{{wrongProblem.Wtype=='听写' && wrongProblem.WproblemPath!=''}}"
+                id="myAudio"
+                src="{{wrongProblem.WproblemPath?(audioUrl + wrongProblem.WproblemPath):''}}"
+                controls="true"
+                name=""
+                author=""
+            ></audio>
         </view>
         
         
@@ -223,15 +228,17 @@ export default class Index extends wepy.page {
     }
 
     onLoad(options) {
-        let self = this
-
-        self.Wid = options.wid
-        self.Sname = options.sname
+        this.Wid = options.wid
+        this.Sname = options.sname
+        this.audioContext = wx.createAudioContext('myAudio');
     }
 
     onShow(){
-        let self = this
-        self.getWrongProblem()
+        this.getWrongProblem()
+    }
+
+    onHide(){
+        this.audioContext && this.audioContext.pause();
     }
 }
 </script>

@@ -141,7 +141,6 @@ import {
     typeRange
 } from '@/common/constant';
 
-const innerAudioContext = wx.createInnerAudioContext()
 import wepy from 'wepy'
 import {getSubjectAndType, getSubjectAndTypeIndex} from "@/common/param-conversion";
 import {AUTO_CORRECT} from "@/common/constant";
@@ -249,10 +248,10 @@ export default class Index extends wepy.page{
         },
 
         onClickPlayRecord() {
-            innerAudioContext.src = this.audioUploadPath;
-            innerAudioContext.play();
-            innerAudioContext.onEnded(() => {
-                innerAudioContext.stop();
+            this.innerAudioContext.src = this.audioUploadPath;
+            this.innerAudioContext.play();
+            this.innerAudioContext.onEnded(() => {
+                this.innerAudioContext.stop();
             });
         },
 
@@ -469,6 +468,15 @@ export default class Index extends wepy.page{
         this.Eid = options.eid;
         this.getExercise({Eid: this.Eid});
         this.initValidate();
+        this.innerAudioContext = wx.createInnerAudioContext();
+    }
+
+    onHide(){
+        this.innerAudioContext.stop();
+    }
+
+    onUnload(){
+        this.innerAudioContext.stop();
     }
 }
 </script>

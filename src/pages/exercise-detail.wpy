@@ -35,16 +35,20 @@ page{
             {{exercise.EnameTxt}}
         </view>
 
-        <view class="margin" wx:if="{{exercise.EnamePath!=''}}">
+        <view wx:if="{{exercise.EnamePath!=''}}">
             <view wx:if="{{exercise.Etype!='听写'}}" >
                 <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
                     <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" @tap="ViewImageOfName" data-url="{{imgOfName}}"></image>
                 </view>
             </view>
-            
-            <audio src="{{exercise.EnamePath?(audioUrl + exercise.EnamePath):''}}" wx:if="{{exercise.Etype=='听写' && exercise.EnamePath!=''}}" controls="true" name="" author=""></audio>
-
-            
+            <audio
+                src="{{exercise.EnamePath?(audioUrl + exercise.EnamePath):''}}"
+                id="myAudio"
+                wx:if="{{exercise.Etype=='听写' && exercise.EnamePath!=''}}"
+                controls="true"
+                name="{{exercise.Etitle}}"
+                author=""
+            ></audio>
         </view>
         
         
@@ -196,11 +200,16 @@ export default class Index extends wepy.page {
         let self = this
 
         self.Eid = options.eid
+        this.audioContext = wx.createAudioContext('myAudio');
     }
 
     onShow(){
         let self = this
         self.getExerciseData()
+    }
+
+    onHide(){
+        this.audioContext && this.audioContext.pause();
     }
 }
 </script>

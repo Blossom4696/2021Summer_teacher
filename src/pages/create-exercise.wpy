@@ -146,7 +146,6 @@ import {
     AUTO_CORRECT
 } from '@/common/constant';
 
-const innerAudioContext = wx.createInnerAudioContext();
 import wepy from 'wepy';
 import {getSubjectAndType} from "@/common/param-conversion";
 import ImageList from "@/components/image-list";
@@ -256,10 +255,10 @@ export default class Index extends wepy.page {
         },
 
         onClickPlayRecord() {
-            innerAudioContext.src = this.audioUploadPath;
-            innerAudioContext.play();
-            innerAudioContext.onEnded(() => {
-                innerAudioContext.stop();
+            this.innerAudioContext.src = this.audioUploadPath;
+            this.innerAudioContext.play();
+            this.innerAudioContext.onEnded(() => {
+                this.innerAudioContext.stop();
             });
         },
 
@@ -428,8 +427,16 @@ export default class Index extends wepy.page {
     }
 
     onLoad() {
-        let self = this
-        self.initValidate();
+        this.initValidate();
+        this.innerAudioContext = wx.createInnerAudioContext();
+    }
+
+    onHide(){
+        this.innerAudioContext.stop();
+    }
+
+    onUnload(){
+        this.innerAudioContext.stop();
     }
 }
 </script>
