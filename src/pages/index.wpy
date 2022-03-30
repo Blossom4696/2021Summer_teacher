@@ -1,66 +1,72 @@
 <!-- index.wpy -->
 <style>
+.theme-background{
+    background-color: #a1c4fd;
+    height: 100vh;
+}
 </style>
 
 <template>
-
-    <view class="cu-card">
-        <view class="cu-item shadow radius">
-            <view class="flex align-center" @tap="onClickLogin">
-                <image background-size="cover" class="margin margin-lr"
-                       src="{{userInfo==null?teacherIconNoLogin:imgUrl + userInfo.Ticon}}" style="width:50rpx;height:50rpx"/>
-                <view class="margin">
-                    <view class="text-black text-xl text-bold">
-                        {{ userInfo == null ? '教师未登录（点击登录）' : userInfo.Tnickname }}
+    <view class="theme-background">
+        <view class="cu-card">
+            <view class="cu-item shadow radius">
+                <view class="flex align-center" @tap="onClickLogin">
+                    <image background-size="cover" class="margin margin-lr"
+                           src="{{userInfo==null?teacherIconNoLogin:imgUrl + userInfo.Ticon}}" style="width:50rpx;height:50rpx"/>
+                    <view class="margin">
+                        <view class="text-black text-xl text-bold">
+                            {{ userInfo == null ? '教师未登录（点击登录）' : userInfo.Tnickname }}
+                        </view>
                     </view>
                 </view>
             </view>
-        </view>
-        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
-            <view class="cu-list menu card-menuradius shadow">
-                <view class="cu-item arrow" data-url="create-todayexercise" @tap="onClick">
-                    <view class="content">
-                        <view>布置今日习题</view>
-                    </view>
-                </view>
-                <view class="cu-item arrow" data-url="student" @tap="onClick">
-                    <view class="content">
-                        <view>学生管理（今日习题、错题、学情）</view>
-                    </view>
-                </view>
-            </view>
-        </view>
-
-<!--        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
-            <view class="cu-item">
+            <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
                 <view class="cu-list menu card-menuradius shadow">
-                    <view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
+                    <view class="cu-item arrow" data-url="create-todayexercise" @tap="onClick">
                         <view class="content">
-                            <view>学生提问</view>
-                        </view>
-                        <view class="flex justify-end">
-                            更多
+                            <view>布置今日习题</view>
                         </view>
                     </view>
-                </view>
-                <view class="cu-list menu card-menuradius shadow">
-                    <view class="cu-item flex align-center" data-id="{{index}}" wx:for="{{askQuestionList}}"
-                          wx:for-item="askQuestion" wx:key="index" @tap="onClickAskQuestion">
-                        <view class="flex-sub">
-                            <view class="text-center">{{ askQuestion.Snickname }}</view>
+                    <view class="cu-item arrow" data-url="student" @tap="onClick">
+                        <view class="content">
+                            <view>学生管理（今日习题、错题、学情）</view>
                         </view>
-                        <view class="flex-treble">
-                            <view class="text-center">{{ askQuestion.Eid == -1 ? '学生自主提问' : askQuestion.Etitle }}</view>
-                        </view>
-                        <view class="flex-twice">
-                            <view class="text-center">{{ askQuestion.AQtime }}</view>
-                        </view>
-
                     </view>
                 </view>
             </view>
-        </view>-->
+
+            <!--        <view class="cu-item margin-top-xl margin-bottom-xl" wx:if="{{userInfo!=null}}">
+                        <view class="cu-item">
+                            <view class="cu-list menu card-menuradius shadow">
+                                <view class="cu-item arrow align-center" data-url="askquestion" @tap="onClick">
+                                    <view class="content">
+                                        <view>学生提问</view>
+                                    </view>
+                                    <view class="flex justify-end">
+                                        更多
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="cu-list menu card-menuradius shadow">
+                                <view class="cu-item flex align-center" data-id="{{index}}" wx:for="{{askQuestionList}}"
+                                      wx:for-item="askQuestion" wx:key="index" @tap="onClickAskQuestion">
+                                    <view class="flex-sub">
+                                        <view class="text-center">{{ askQuestion.Snickname }}</view>
+                                    </view>
+                                    <view class="flex-treble">
+                                        <view class="text-center">{{ askQuestion.Eid == -1 ? '学生自主提问' : askQuestion.Etitle }}</view>
+                                    </view>
+                                    <view class="flex-twice">
+                                        <view class="text-center">{{ askQuestion.AQtime }}</view>
+                                    </view>
+
+                                </view>
+                            </view>
+                        </view>
+                    </view>-->
+        </view>
     </view>
+
 
 
     <mp-dialog bindbuttontap="tapDialogButton" buttons="{{buttons}}" show="{{dialogShow}}" title="登录">
