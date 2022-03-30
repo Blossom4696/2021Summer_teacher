@@ -82,6 +82,9 @@ export default class AudioRecord extends wepy.component {
                         self.$apply();
                     }
 
+                },
+                fail(err){
+                    console.log(err);
                 }
             });
         },

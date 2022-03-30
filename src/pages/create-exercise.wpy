@@ -310,17 +310,21 @@ export default class Index extends wepy.page {
                     });
                     return;
                 }
-                const resultPath = await audioUpload(this.audioUploadPath);
-                if(!resultPath){
+                try{
+                    const resultPath = await audioUpload(this.audioUploadPath);
+                    if(!resultPath){
+                        throw new Error("录音路径为空");
+                    }
+                    if(!sendFormData.EnameTxt){
+                        sendFormData.EnameTxt = "听力";
+                    }
+                    sendFormData.EnamePath = resultPath;
+                }catch(e){
                     wx.showModal({
                         content: '上传音频失败，请重试',
                         showCancel: false,
                     })
                     return;
-                }
-                if(!sendFormData.EnameTxt){
-                    sendFormData.EnameTxt = "听力";
-                    sendFormData.EnamePath = resultPath;
                 }
             }
 

@@ -13,6 +13,7 @@ export async function uploadImageList(imageList, directoryName = "tmp") {
             imageUrlList[key] = array[1];
             continue;
         }
+        let currentKey = key;
         await new Promise((resolve) => {
             wepy.uploadFile({
                 url: wepy.$instance.globalData.serverUrl + '/app/file/upload_file',
@@ -25,7 +26,7 @@ export async function uploadImageList(imageList, directoryName = "tmp") {
                 success(e) {
                     const data = JSON.parse(e.data);
                     if (data.Code == 1) {
-                        imageUrlList[key] = data.Data;
+                        imageUrlList[currentKey] = data.Data;
                     } else {
                         failedImageList.push(image);
                     }
@@ -44,7 +45,6 @@ export async function uploadImageList(imageList, directoryName = "tmp") {
 
 // 上传音频
 export async function audioUpload(audioPath, directoryName = "") {
-    let returnPath;
     let serverDirectory = "https://www.kaigestudy.top:8080/app/file/get_audio?name=" + directoryName;
     const index = audioPath.indexOf(serverDirectory);
     if (index >= 0) {
@@ -52,7 +52,7 @@ export async function audioUpload(audioPath, directoryName = "") {
         const array = temp.match(/\/+(.+)/);
         return array[1];
     }
-    await new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         wepy.uploadFile({
             url: wepy.$instance.globalData.serverUrl + '/app/file/upload_file', //开发者服务器 url
             header: wepy.$instance.setHeader(),
@@ -62,18 +62,20 @@ export async function audioUpload(audioPath, directoryName = "") {
                 dirName: "audios/" + directoryName
             },
             success(e) {
-                const data = JSON.parse(e.data);
-                if (data.Code == 1) {
-                    returnPath = data.Data;
+                try{
+                    const data = JSON.parse(e.data);
+                    if (data.Code == 1) {
+                        resolve(data.Data);
+                    }else{
+                        reject("录音保存失败")
+                    }
+                }catch(e){
+                    reject("录音保存失败")
                 }
             },
             fail() {
-                console.log("录音保存失败")
+                reject("录音保存失败")
             },
-            complete() {
-                resolve();
-            }
         });
     })
-    return returnPath;
 }
