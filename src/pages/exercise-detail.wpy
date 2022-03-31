@@ -34,21 +34,18 @@ page{
         <view class="margin text-lg" wx:if="{{exercise.EnameTxt!=''}}">
             {{exercise.EnameTxt}}
         </view>
-
-        <view wx:if="{{exercise.EnamePath!=''}}">
-            <view wx:if="{{exercise.Etype!='听写'}}" >
-                <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
-                    <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" @tap="ViewImageOfName" data-url="{{imgOfName}}"></image>
-                </view>
+        <audio
+            src="{{exercise.EaudioPath?(audioUrl + exercise.EaudioPath):''}}"
+            id="myAudio"
+            wx:if="{{exercise.Etype=='听写' && exercise.EaudioPath!=''}}"
+            controls="true"
+            name="{{exercise.Etitle}}"
+            author=""
+        ></audio>
+        <view wx:if="{{imageListOfName.length > 0}}">
+            <view wx:for="{{imageListOfName}}" wx:key="index" wx:for-item="imgOfName">
+                <image src="{{imgOfName!=imageUrl?imgOfName:''}}" mode="widthFix" @tap="ViewImageOfName" data-url="{{imgOfName}}"></image>
             </view>
-            <audio
-                src="{{exercise.EnamePath?(audioUrl + exercise.EnamePath):''}}"
-                id="myAudio"
-                wx:if="{{exercise.Etype=='听写' && exercise.EnamePath!=''}}"
-                controls="true"
-                name="{{exercise.Etitle}}"
-                author=""
-            ></audio>
         </view>
         
         
@@ -176,20 +173,29 @@ export default class Index extends wepy.page {
                 },
                 success: function(res) {
                     console.log(res)
-                    if (res.data.Code == 1){
+                    if (res.data.Code === 1){
                         const exercise = res.data.Data;
-                        if(exercise.EnamePath!=""){
+                        if(exercise.EnamePath !== ""){
                             let tmpList = exercise.EnamePath.split(";")
                             self.imageListOfName = tmpList.map(x => self.imageUrl + x)
+                        }else{
+                            self.imageListOfName = [];
                         }
-                        if(exercise.EanswerPath!=""){
+                        if(exercise.EanswerPath !== ""){
                             let tmpList = exercise.EanswerPath.split(";")
                             self.imageListOfAnswer = tmpList.map(x => self.imageUrl + x)
+                        }else{
+                            self.imageListOfAnswer = [];
                         }
                         if(exercise.Etype === "选择题"){
-                            exercise.EanswerTxt = getSelectionText(exercise.EanswerTxt, JSON.parse(exercise.EtypeDetail));
+                            try{
+                                exercise.EanswerTxt = getSelectionText(exercise.EanswerTxt, JSON.parse(exercise.EtypeDetail));
+                            }catch(e){
+                                console.warn(e);
+                            }
                         }
                         self.exercise = exercise;
+                        console.log(self.exercise.EaudioPath);
                         self.$apply()
                     }
                 }
@@ -200,6 +206,7 @@ export default class Index extends wepy.page {
         let self = this
 
         self.Eid = options.eid
+        console.log(options);
         this.audioContext = wx.createAudioContext('myAudio');
     }
 

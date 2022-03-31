@@ -63,7 +63,31 @@
 		<input name="EnameTxt" placeholder="习题题目文字" value="{{exercise.EnameTxt}}"></input>
 	</view>
 
-    <block wx:if="{{type !== '听写'}}">
+    <block wx:if="{{type === '听写'}}">
+        <view class='cu-bar bg-white' style='border-top:1rpx solid #eee;'>
+            <view class='action'>
+                习题题目音频
+            </view>
+            <view class='action'>
+                {{ audioUploadPath == '' ? '0' : '1' }}/1
+            </view>
+            <button class="cu-btn bg-{{audioUploadPath!=''?'green':'grey'}} shadow" @tap='onClickPlayRecord'>播放录音
+            </button>
+        </view>
+        <audio-record @audioChange.user="onAudioChange"></audio-record>
+    </block>
+
+    <view class='bg-white cu-form-group' style="padding: 0">
+        <name-image-list
+            @imageListChange.user="onImageListOfNameChange"
+            :imageList.sync='imageListOfName'
+            type='add'
+            title="习题题目图片"
+        >
+        </name-image-list>
+    </view>
+
+<!--    <block wx:if="{{type !== '听写'}}">
         <view class='bg-white' style='border-top:1rpx solid #eee;'>
             <name-image-list
                 @imageListChange.user="onImageListOfNameChange"
@@ -86,7 +110,7 @@
             </button>
         </view>
         <audio-record @audioChange.user="onAudioChange" :audioUploadPath.sync="audioUploadPath"></audio-record>
-    </block>
+    </block>-->
 
     <block wx:if="{{type === '选择题'}}">
         <view class='cu-form-group'>
@@ -115,7 +139,7 @@
         <input name='EanswerTxt' value="{{exercise.EanswerTxt}}" bindinput="onAnswerChange" placeholder='习题答案文字'></input>
     </view>
 
-    <view class='bg-white' style='border-top:1rpx solid #eee;'>
+    <view class='bg-white cu-form-group' style="padding: 0">
         <answer-image-list
             @imageListChange.user="onImageListOfAnswerChange"
             :imageList.sync='imageListOfAnswer'
@@ -166,10 +190,6 @@ export default class Index extends wepy.page{
         imageListOfAnswer: [],
         subjectAndTypeValue: [null, null],
         exercise:{},
-        imgList: {
-            name:[],
-            answer:[],
-        },
         type: undefined,
         selectionConfigIndex: [0, 0],
         gradePicker: gradeRange,
@@ -256,16 +276,14 @@ export default class Index extends wepy.page{
         },
 
         async formSubmit(e) {
-            let self = this;
-
             let sendFormData = e.detail.value; // form 表单数据
-            console.log(sendFormData);
+            //根据Index获取学科与类型数据
             const {subject, type} = getSubjectAndType(this.subjectAndTypeValue);
             sendFormData.Esubject = subject;
             sendFormData.Etype = type;
-            if (!self.validator.checkForm(sendFormData)) {
+            if (!this.validator.checkForm(sendFormData)) {
                 //表单元素验证不通过，此处给出相应提示
-                let error = self.validator.errorList[0];
+                let error = this.validator.errorList[0];
                 wx.showToast({
                     title: error.msg, //提示的内容,
                     icon: 'none', //图标,
@@ -275,7 +293,7 @@ export default class Index extends wepy.page{
                 return false;
             }
 
-
+            //获取批改模式字段
             const EautoCorrect = autoCorrectRange[sendFormData.EautoCorrect].value;
             if(EautoCorrect === AUTO_CORRECT.AUTO && !sendFormData.EanswerTxt.trim()){
                 wx.showModal({
@@ -297,14 +315,12 @@ export default class Index extends wepy.page{
                 }
                 try{
                     const resultPath = await audioUpload(this.audioUploadPath);
-                    if(!resultPath){
-                        throw new Error("录音路径为空");
-                    }
                     if(!sendFormData.EnameTxt){
                         sendFormData.EnameTxt = "听力";
                     }
-                    sendFormData.EnamePath = resultPath;
+                    sendFormData.EaudioPath = resultPath;
                 }catch(e){
+                    console.log(e);
                     wx.showModal({
                         content: '上传音频失败，请重试',
                         showCancel: false,
@@ -321,12 +337,12 @@ export default class Index extends wepy.page{
                         title: "请选择选择题设置", //提示的内容,
                         icon: 'none', //图标,
                         mask: true, //显示透明蒙层，防止触摸穿透,
-                        success: res => {}
                     });
                     return false;
                 }
             }
 
+            //若题目即不存在文字，也不存在图片，则提示输入题目
             if(this.imageListOfName.length === 0 && !sendFormData.EnameTxt){
                 wx.showToast({
                     title: "请输入题目", //提示的内容,
@@ -336,6 +352,7 @@ export default class Index extends wepy.page{
                 return false;
             }
 
+            //若答案即不存在文字，也不存在图片，则提示输入答案
             if(this.imageListOfAnswer.length === 0 && !sendFormData.EanswerTxt){
                 wx.showToast({
                     title: "请输入答案", //提示的内容,
@@ -345,9 +362,9 @@ export default class Index extends wepy.page{
                 return false;
             }
 
+            //上传图片
             if(this.imageListOfName.length > 0){
                 const { imageUrlList, failedImageList } = await uploadImageList(this.imageListOfName, "exercise");
-                console.log(imageUrlList, failedImageList);
                 if(failedImageList.length > 0){
                     wx.showToast({
                         title: "上传图片失败，请检查网络", //提示的内容,
@@ -358,6 +375,8 @@ export default class Index extends wepy.page{
                 }else{
                     sendFormData.EnamePath = imageUrlList.join(";");
                 }
+            }else{
+                sendFormData.EnamePath = "";
             }
             if(this.imageListOfAnswer.length > 0){
                 const { imageUrlList, failedImageList } = await uploadImageList(this.imageListOfAnswer, "exercise");
@@ -371,11 +390,14 @@ export default class Index extends wepy.page{
                 }else{
                     sendFormData.EanswerPath = imageUrlList.join(";");
                 }
+            }else{
+                sendFormData.EanswerPath = "";
             }
+
             sendFormData.Eid = Number(this.Eid);
             wepy.$instance.putWithToken('/app/exercise/update_exercise', sendFormData).then(
                 function (res) {
-                    if (res.data.Code == 1){
+                    if (res.data.Code === 1){
                         wepy.showToast({
                             title: '修改成功', //提示的内容,
                             icon: 'success', //图标,
@@ -390,6 +412,13 @@ export default class Index extends wepy.page{
 
                             },
                         });
+                    }else{
+                        wepy.showToast({
+                            title: '修改失败，请重试', //提示的内容,
+                            icon: 'error', //图标,
+                            duration: 1000, //延迟时间,
+                            mask: true, //显示透明蒙层，防止触摸穿透,
+                        });
                     }
                 }
             );
@@ -397,29 +426,29 @@ export default class Index extends wepy.page{
     }
 
     findIndex(){
-        let self = this
-        for(let i=0;i<self.gradePicker.length;i++){
-            if(self.gradePicker[i] == self.exercise.Egrade){
-                self.gradeIndex = i
+        for(let i=0;i<this.gradePicker.length;i++){
+            if(this.gradePicker[i] === this.exercise.Egrade){
+                this.gradeIndex = i
             }
         }
-        for(let i=0;i<self.difficultyPicker.length;i++){
-            if(self.difficultyPicker[i] == self.exercise.Edifficulty){
-                self.difficultyIndex = i
+        for(let i=0;i<this.difficultyPicker.length;i++){
+            if(this.difficultyPicker[i] === this.exercise.Edifficulty){
+                this.difficultyIndex = i
             }
         }
-        for(let i = 0; i < self.autoCorrectPicker.length; i++){
-            if(self.autoCorrectPicker[i].value === self.exercise.EautoCorrect){
-                self.autoCorrectIndex = i
+        for(let i = 0; i < this.autoCorrectPicker.length; i++){
+            if(this.autoCorrectPicker[i].value === this.exercise.EautoCorrect){
+                this.autoCorrectIndex = i
             }
         }
-        console.log(this);
     }
 
+
+    //获取题目
     getExercise(data){
         wepy.$instance.getWithToken('/app/exercise/get_exercise', data).then((res) => {
             const {Code, Data} = res.data;
-            if(Code != 1){
+            if(Code !== 1){
                 wx.showModal({
                     content: '获取数据失败，请刷新重试',
                     showCancel: false,
@@ -427,12 +456,12 @@ export default class Index extends wepy.page{
                 return;
             }
             this.exercise = Data;
-            const {Esubject, Etype, EnamePath, EanswerPath, EtypeDetail, EanswerTxt} = this.exercise;
-            if(Etype !== "听写" && EnamePath){
-                this.imgList.name = EnamePath.split(";").map(x => IMAGE_OF_EXERCISE_URL + x);
-                this.imageListOfName = this.imgList.name;
-            }else{
-                this.audioUploadPath = AUDIO_URL + this.exercise.EnamePath;
+            const {Esubject, Etype, EnamePath, EanswerPath, EtypeDetail, EanswerTxt, EaudioPath} = this.exercise;
+            if(EnamePath){
+                this.imageListOfName = EnamePath.split(";").map(x => IMAGE_OF_EXERCISE_URL + x);
+            }
+            if (Etype === "听写") {
+                this.audioUploadPath = AUDIO_URL + EaudioPath;
             }
             if(Etype === "选择题"){
                 if(EtypeDetail){
@@ -442,8 +471,7 @@ export default class Index extends wepy.page{
                 console.log(this.selectionAnswerIndex);
             }
             if(EanswerPath){
-                this.imgList.answer = EanswerPath.split(";").map(x => IMAGE_OF_EXERCISE_URL + x);
-                this.imageListOfAnswer = this.imgList.answer;
+                this.imageListOfAnswer = EanswerPath.split(";").map(x => IMAGE_OF_EXERCISE_URL + x);
             }
             this.subjectAndTypeValue = getSubjectAndTypeIndex(Esubject, Etype);
             this.findIndex();
