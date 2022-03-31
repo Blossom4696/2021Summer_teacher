@@ -1,5 +1,5 @@
 <template>
-    <block wx:if="{{type === 'add' || imageList.length > 0}}">
+    <view wx:if="{{type === 'add' || imageList.length > 0}}" style="width: 100%">
         <view class='cu-bar bg-white' wx:if="{{type === 'add'}}">
             <view class='action'>
                 {{ title }}
@@ -20,7 +20,7 @@
                 <text class='cuIcon-cameraadd'></text>
             </view>
         </view>
-    </block>
+    </view>
 </template>
 <script>
 import wepy from 'wepy';

@@ -49,8 +49,13 @@ export async function audioUpload(audioPath, directoryName = "") {
     const index = audioPath.indexOf(serverDirectory);
     if (index >= 0) {
         const temp = audioPath.substring(index + serverDirectory.length);
-        const array = temp.match(/\/+(.+)/);
-        return array[1];
+        const lastIndexOfSlash = temp.lastIndexOf("/");
+        if(lastIndexOfSlash >= 0){
+            const array = temp.match(/\/+(.+)/);
+            return array[1];
+        }else{
+            return temp;
+        }
     }
     return new Promise((resolve, reject) => {
         wepy.uploadFile({
@@ -64,7 +69,10 @@ export async function audioUpload(audioPath, directoryName = "") {
             success(e) {
                 try{
                     const data = JSON.parse(e.data);
-                    if (data.Code == 1) {
+                    if (data.Code === 1) {
+                        if(!data.Data){
+                            reject("录音路径为空")
+                        }
                         resolve(data.Data);
                     }else{
                         reject("录音保存失败")
