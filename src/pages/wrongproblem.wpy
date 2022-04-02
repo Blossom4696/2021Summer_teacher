@@ -190,7 +190,7 @@ page {
     </view>
 
     <view class="justify-between flex bg-white align-center padding-lr-xs">
-        <scroll-view class="bg-white nav" scroll-x scroll-with-animation style="width:90vw">
+        <scroll-view class="bg-white nav" scroll-x scroll-with-animation style="width:70vw">
             <view class="cu-item {{index==screenCur.subjectCur?'text-orange cur':''}}" wx:for="{{exerciseField.Esubject}}" wx:key wx:for-item="item" @tap="tabSelectIndex" data-id="{{index}}" data-name="subject">
                 {{item}}
             </view>
