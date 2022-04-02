@@ -1,0 +1,74 @@
+<template>
+	<view style='width: 100%'>
+		<view class="flex padding">
+			<view class="flex-sub padding" @tap="reset">重置</view>
+			<view class="flex-sub padding text-center" style="font-weight:bold">筛选错题</view>
+			<view class="flex-sub padding text-right" style="color:blue" @tap="complete">完成</view>
+		</view>
+		<view>
+			<view class="margin" style="font-weight:bold">年级</view>
+			<view class="grid col-{{exerciseField.Egrade.length>3?3:exerciseField.Egrade.length}} margin text-center">
+				<view  wx:for="{{exerciseField.Egrade}}" wx:key>
+					<button class="round cu-btn lines-{{screenCur.gradeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="grade" data-id="{{index}}">{{exerciseField.Egrade[index]}}</button>
+				</view>
+			</view>
+		</view>
+		<view>
+			<view class="margin" style="font-weight:bold">错题难度</view>
+			<view class="grid col-{{exerciseField.Edifficulty.length>4?4:exerciseField.Edifficulty.length}} margin text-center">
+				<view  wx:for="{{exerciseField.Edifficulty}}" wx:key>
+					<button class="round cu-btn lines-{{screenCur.difficultyCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="difficulty" data-id="{{index}}">{{exerciseField.Edifficulty[index]}}</button>
+				</view>
+			</view>
+		</view>
+		<view>
+			<view class="margin" style="font-weight:bold">错题类型</view>
+			<view class="margin">学科</view>
+			<view class="grid col-{{exerciseField.Esubject.length>4?4:exerciseField.Esubject.length}} margin text-center">
+				<view  wx:for="{{exerciseField.Esubject}}" wx:key>
+					<button class="round cu-btn lines-{{screenCur.subjectCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="subject" data-id="{{index}}">{{exerciseField.Esubject[index]}}</button>
+				</view>
+			</view>
+			<view class="margin">题型</view>
+			<view class="grid margin text-center col-{{exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]].length>3?3:exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]].length}}">
+				<view  wx:for="{{exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]]}}" wx:key wx-for-item="item">
+					<button class="round cu-btn lines-{{screenCur.typeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="type" data-id="{{index}}">{{item}}</button>
+				</view>
+			</view>
+			<view class="margin">单元</view>
+			<view class="grid margin text-center col-{{exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]].length>3?3:exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]].length}}">
+				<view  wx:for="{{exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]]}}" wx:key wx-for-item="item">
+					<button class="round cu-btn lines-{{screenCur.unitCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="unit" data-id="{{index}}">{{item}}</button>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+import wepy from 'wepy';
+
+export default class SelectionPage extends wepy.component {
+	props = {
+		exerciseField: {
+			type: Object,
+			default: {},
+		},
+		screenCur: {
+			type: Object,
+			default: {},
+		}
+	};
+	data = {};
+	methods = {
+		tabSelect: function(e){
+			this.$emit('selectionChange', { name: e.currentTarget.dataset.name, index: e.currentTarget.dataset.id });
+		},
+		complete: function(e){
+			this.$emit('complete');
+		},
+		reset: function(e){
+			this.$emit('reset');
+		}
+	};
+}
+</script>

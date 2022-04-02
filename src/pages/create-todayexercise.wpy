@@ -254,7 +254,7 @@ page {
 </view>
 
 <scroll-view scroll-y class="DrawerWindow {{modalName=='viewModal'?'show':''}}">
-    <view class="flex padding">
+<!--    <view class="flex padding">
         <view class="flex-sub padding" @tap="onClickReset">重置</view>
         <view class="flex-sub padding text-center" style="font-weight:bold">筛选习题</view>
         <view class="flex-sub padding text-right" style="color:blue" @tap="hideModal">完成</view>
@@ -263,7 +263,7 @@ page {
         <view class="margin" style="font-weight:bold">年级</view>
         <view class="grid col-{{exerciseField.Egrade.length>3?3:exerciseField.Egrade.length}} margin text-center">
             <view  wx:for="{{exerciseField.Egrade}}" wx:key>
-                <button class="round cu-btn lines-{{exerciseScreen.gradeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="grade" data-id="{{index}}">{{exerciseField.Egrade[index]}}</button>
+                <button class="round cu-btn lines-{{screenCur.gradeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="grade" data-id="{{index}}">{{exerciseField.Egrade[index]}}</button>
             </view>
         </view>
     </view>
@@ -271,7 +271,7 @@ page {
         <view class="margin" style="font-weight:bold">习题难度</view>
         <view class="grid col-{{exerciseField.Edifficulty.length>4?4:exerciseField.Edifficulty.length}} margin text-center">
             <view  wx:for="{{exerciseField.Edifficulty}}" wx:key>
-                <button class="round cu-btn lines-{{exerciseScreen.difficultyCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="difficulty" data-id="{{index}}">{{exerciseField.Edifficulty[index]}}</button>
+                <button class="round cu-btn lines-{{screenCur.difficultyCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="difficulty" data-id="{{index}}">{{exerciseField.Edifficulty[index]}}</button>
             </view>
         </view>
     </view>
@@ -280,29 +280,37 @@ page {
         <view class="margin">学科</view>
         <view class="grid col-{{exerciseField.Esubject.length>4?4:exerciseField.Esubject.length}} margin text-center">
             <view  wx:for="{{exerciseField.Esubject}}" wx:key>
-                <button class="round cu-btn lines-{{exerciseScreen.subjectCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="subject" data-id="{{index}}">{{exerciseField.Esubject[index]}}</button>
+                <button class="round cu-btn lines-{{screenCur.subjectCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="subject" data-id="{{index}}">{{exerciseField.Esubject[index]}}</button>
             </view>
         </view>
         <view class="margin">题型</view>
-        <view class="grid margin text-center col-{{exerciseField.Etype[exerciseField.Esubject[exerciseScreen.subjectCur]].length>3?3:exerciseField.Etype[exerciseField.Esubject[exerciseScreen.subjectCur]].length}}">
-            <view  wx:for="{{exerciseField.Etype[exerciseField.Esubject[exerciseScreen.subjectCur]]}}" wx:key wx-for-item="item">
-                <button class="round cu-btn lines-{{exerciseScreen.typeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="type" data-id="{{index}}">{{item}}</button>
+        <view class="grid margin text-center col-{{exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]].length>3?3:exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]].length}}">
+            <view  wx:for="{{exerciseField.Etype[exerciseField.Esubject[screenCur.subjectCur]]}}" wx:key wx-for-item="item">
+                <button class="round cu-btn lines-{{screenCur.typeCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="type" data-id="{{index}}">{{item}}</button>
             </view>
         </view>
         <view class="margin">单元</view>
-        <view class="grid margin text-center col-{{exerciseField.Eunit[exerciseField.Esubject[exerciseScreen.subjectCur]].length>3?3:exerciseField.Eunit[exerciseField.Esubject[exerciseScreen.subjectCur]].length}}">
-            <view  wx:for="{{exerciseField.Eunit[exerciseField.Esubject[exerciseScreen.subjectCur]]}}" wx:key wx-for-item="item">
-                <button class="round cu-btn lines-{{exerciseScreen.unitCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="unit" data-id="{{index}}">{{item}}</button>
+        <view class="grid margin text-center col-{{exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]].length>3?3:exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]].length}}">
+            <view  wx:for="{{exerciseField.Eunit[exerciseField.Esubject[screenCur.subjectCur]]}}" wx:key wx-for-item="item">
+                <button class="round cu-btn lines-{{screenCur.unitCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="unit" data-id="{{index}}">{{item}}</button>
             </view>
         </view>
-    </view>
+    </view>-->
+    <selection-page
+        :exerciseField.sync='exerciseField'
+        :screenCur.sync='screenCur'
+        @selectionChange.user='onSelectionChange'
+        @complete.user='onComplete'
+        @reset.user='onReset'
+    ></selection-page>
 </scroll-view>
 
 </template>
 
 <script>
   import wepy from 'wepy'
-
+  import SelectionPage from "@/components/selection-page";
+  import { getSearchRanges } from '../common/constant';
   export default class Index extends wepy.page {
     config = {
         "usingComponents": {
@@ -310,14 +318,16 @@ page {
             "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
         }
     }
-
+      components = {
+          'selection-page': SelectionPage,
+      }
     data = {
         activeTab: 0,
         tabbar: ['习题','学生'],
         exerciseList:[],
         copyExerciseList: [],
         exerciseField:{},
-        exerciseScreen: {
+        screenCur: {
             subjectCur: 0,
             difficultyCur: 0,
             typeCur:0,
@@ -359,7 +369,31 @@ page {
 
         tabSelect(e) {
             let self = this
-            self.exerciseScreen[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
+            self.screenCur[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
+        },
+
+        onSelectionChange({name, index}){
+            this.screenCur[name+"Cur"]= index;
+            if(name === "subject"){
+                this.screenCur.unitCur = 0;
+                this.screenCur.typeCur = 0;
+            }
+        },
+
+        onComplete(){
+            let self = this
+            self.modalName= null
+            self.getSortedWrongProblem()
+        },
+
+        onReset(){
+            this.screenCur= {
+                subjectCur: 0,
+                difficultyCur: 0,
+                typeCur:0,
+                gradeCur: 0,
+                unitCur: 0,
+            }
         },
 
         showModal(e) {
@@ -393,7 +427,7 @@ page {
 
         onClickReset(){
             let self = this
-            self.exerciseScreen={
+            self.screenCur={
                 subjectCur: 0,
                 difficultyCur: 0,
                 typeCur:0,
@@ -516,7 +550,7 @@ page {
                 success: function(res) {
                     console.log(res)
                     if (res.data.Code == 1){
-                        self.exerciseField = res.data.Data
+                        self.exerciseField = getSearchRanges(res.data.Data.Eunit);
                         self.$apply()
                     }
                 }
@@ -529,11 +563,11 @@ page {
                 method:'GET',
                 header: wepy.$instance.setHeader(),
                 data:{
-                    subject:self.exerciseField.Esubject[self.exerciseScreen.subjectCur],
-                    type:self.exerciseField.Etype[self.exerciseField.Esubject[self.exerciseScreen.subjectCur]][self.exerciseScreen.typeCur],
-                    unit:self.exerciseField.Eunit[self.exerciseField.Esubject[self.exerciseScreen.subjectCur]][self.exerciseScreen.unitCur],
-                    difficulty:self.exerciseField.Edifficulty[self.exerciseScreen.difficultyCur],
-                    grade:self.exerciseField.Egrade[self.exerciseScreen.gradeCur],
+                    subject:self.exerciseField.Esubject[self.screenCur.subjectCur],
+                    type:self.exerciseField.Etype[self.exerciseField.Esubject[self.screenCur.subjectCur]][self.screenCur.typeCur],
+                    unit:self.exerciseField.Eunit[self.exerciseField.Esubject[self.screenCur.subjectCur]][self.screenCur.unitCur],
+                    difficulty:self.exerciseField.Edifficulty[self.screenCur.difficultyCur],
+                    grade:self.exerciseField.Egrade[self.screenCur.gradeCur],
                 },
                 success: function(res) {
                     console.log(res)

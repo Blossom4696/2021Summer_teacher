@@ -258,7 +258,7 @@ page {
 </view>
 
 <scroll-view scroll-y class="DrawerWindow {{modalName=='viewModal'?'show':''}}">
-    <view class="flex padding">
+<!--    <view class="flex padding">
         <view class="flex-sub padding">重置</view>
         <view class="flex-sub padding text-center" style="font-weight:bold">筛选错题</view>
         <view class="flex-sub padding text-right" style="color:blue" @tap="hideModal">完成</view>
@@ -299,19 +299,32 @@ page {
                 <button class="round cu-btn lines-{{screenCur.unitCur==index?'blue':'gray'}} shadow padding margin-tb-sm" @tap="tabSelect" data-name="unit" data-id="{{index}}">{{item}}</button>
             </view>
         </view>
-    </view>
+    </view>-->
+    <selection-page
+        :exerciseField.sync='exerciseField'
+        :screenCur.sync='screenCur'
+        @selectionChange.user='onSelectionChange'
+        @complete.user='onComplete'
+        @reset.user='onReset'
+    ></selection-page>
 </scroll-view>
 
 </template>
 
 <script>
 import wepy from 'wepy'
+import SelectionPage from "@/components/selection-page"
+import { getSearchRanges } from '../common/constant';
 export default class Index extends wepy.page{
     config = {
         "usingComponents": {
             "mp-slideview": "weui-miniprogram/slideview/slideview",
             "mp-dialog": "/miniprogram_npm/weui-miniprogram/dialog/dialog",
         }
+    }
+
+    components = {
+        'selection-page': SelectionPage,
     }
 
     data={
@@ -382,6 +395,30 @@ export default class Index extends wepy.page{
         tabSelect(e) {
             let self = this
             self.screenCur[e.currentTarget.dataset.name+"Cur"]= e.currentTarget.dataset.id
+        },
+
+        onSelectionChange({name, index}){
+            this.screenCur[name+"Cur"]= index;
+            if(name === "subject"){
+                this.screenCur.unitCur = 0;
+                this.screenCur.typeCur = 0;
+            }
+        },
+
+        onComplete(){
+            let self = this
+            self.modalName= null
+            self.getSortedWrongProblem()
+        },
+
+        onReset(){
+            this.screenCur= {
+                subjectCur: 0,
+                difficultyCur: 0,
+                typeCur:0,
+                gradeCur: 0,
+                unitCur: 0,
+            }
         },
 
         showModal(e) {
@@ -563,7 +600,7 @@ export default class Index extends wepy.page{
             success: function(res) {
                 console.log(res)
                 if (res.data.Code == 1){
-                    self.exerciseField = res.data.Data
+                    self.exerciseField = getSearchRanges(res.data.Data.Eunit);
                     self.$apply()
                 }
             }

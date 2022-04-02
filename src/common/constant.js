@@ -5,16 +5,41 @@ export const gradeRange = [
   "大学",
 ];
 
-export const subjectRange = ['语文','数学','英语','物理'];
+export const subjectRange = ['语文', '数学', '英语', '物理', '化学', '其他'];
 
+const baseTypeRange = ['选择题', '填空题', '解答题'];
+const languageTypeRange = ['默写', '听写'].concat(baseTypeRange);
 export const typeRange = {
-  '语文':['默写','听写'],
-  '数学':['选择题','填空题','解答题'],
-  '英语':['默写','听写'],
-  '物理':['选择题','填空题','解答题'],
+  '语文': languageTypeRange,
+  '数学': baseTypeRange,
+  '英语': languageTypeRange,
+  '物理': baseTypeRange,
+  '化学': baseTypeRange,
+  '其他': languageTypeRange
 };
 
 export const difficultRange = ['简单', '中等', '困难', '竞赛'];
+
+export const getSearchRanges = (Eunit) => {
+  Eunit = {...Eunit};
+  let Etype = {
+    '': ["不限"],
+    '不限': ["不限"]
+  };
+  subjectRange.forEach((subject) => {
+    Etype[subject] = ['不限'].concat(typeRange[subject]);
+    if(!Eunit[subject]){
+      Eunit[subject] = ['不限'];
+    }
+  })
+  return {
+    Egrade: ['不限'].concat(gradeRange),
+    Esubject: ['不限'].concat(subjectRange),
+    Edifficulty: ['不限'].concat(difficultRange),
+    Etype,
+    Eunit,
+  };
+};
 
 export const AUTO_CORRECT = {
   AUTO: 1,
