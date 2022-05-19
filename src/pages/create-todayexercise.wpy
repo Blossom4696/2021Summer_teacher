@@ -383,7 +383,7 @@ page {
         onComplete(){
             let self = this
             self.modalName= null
-            self.getSortedWrongProblem()
+            self.methods.getExerciseSort(self)
         },
 
         onReset(){

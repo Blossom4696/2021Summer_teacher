@@ -38,10 +38,10 @@ export function isExpired(key){
     return null;
   }
   if(valueWithInfo.expiredAt && (valueWithInfo.expiredAt < 0 || valueWithInfo.expiredAt > new Date().valueOf())){
-    return true;
+    return false;
   }else{
     wx.removeStorageSync(key)
-    return false;
+    return true;
   }
 }
 
